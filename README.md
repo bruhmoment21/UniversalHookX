@@ -18,7 +18,7 @@ The purpose of this library is to show how to hook different backends to display
 
 # How it works
 ## DirectX
-We create a 'dummy device' DirectX with a handle to the [console window](https://docs.microsoft.com/en-us/windows/console/getconsolewindow). See the `CreateDeviceD3DX` function in every DirectX backend. [See DX12 example 'CreateDeviceD3D12'](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L32-L69). The point is to get a pointer to the vTable to get the required functions addresses named respectively. We release it right after getting the pointers because we won't use our 'dummy device' for drawing. [Code used in DX12 backend hook](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L218-L234).
+We create a 'dummy device' DirectX with a handle to the [console window](https://docs.microsoft.com/en-us/windows/console/getconsolewindow). See the `CreateDeviceD3DX` function in every DirectX backend. [See DX12 example 'CreateDeviceD3D12'](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L32-L69). The point is to get a pointer to the vTable to get the required functions addresses. We release it right after getting the pointers because we won't use our 'dummy device' for drawing. [Code used in DX12 backend hook](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L218-L234).
 
 # Media
 ## DirectX9 32bit
@@ -30,7 +30,7 @@ We create a 'dummy device' DirectX with a handle to the [console window](https:/
 ![image](https://user-images.githubusercontent.com/53657322/173922887-f56629da-58bd-4ce6-b818-211c74cad6ab.png)
 
 # Other
-Feel free to open an issue if something isn't working, personally I couldn't get it to work on 'Far Cry 6'. **Resizing** works because we have [ResizeBuffers](https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-resizebuffers) hooked. Input handling is up to you to decide how to make/use it. The WndProc hook is [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L16). It should support both 64bit and 32bit architectures.
+Feel free to open an issue if something isn't working, personally I couldn't get it to work on 'Far Cry 6'. **Resizing** works because [ResizeBuffers](https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-resizebuffers) is hooked. Input handling is up to you to decide how to make/use it. The WndProc hook is [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L16). It should support both 64bit and 32bit architectures.
 
 ## Dependencies
 [MinHook](https://github.com/TsudaKageyu/minhook) - TsudaKageyu - Used for hooking (trampoline method).  
