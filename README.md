@@ -18,7 +18,7 @@ The purpose of this library is to show how to hook different backends to display
 
 # How it works
 ## DirectX
-We create a 'dummy device' DirectX with a handle to the [console window](https://docs.microsoft.com/en-us/windows/console/getconsolewindow). See the `CreateDeviceD3DX` function in every DirectX backend. [See DX12 example 'CreateDeviceD3D12'](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L32-L69). The point is to get a pointer to the vTable to get the required functions addresses named respectively. We release it right after getting the pointers because we won't use our 'dummy device' for drawing. [Code used in DX12 backend hook](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L223-L239).
+We create a 'dummy device' DirectX with a handle to the [console window](https://docs.microsoft.com/en-us/windows/console/getconsolewindow). See the `CreateDeviceD3DX` function in every DirectX backend. [See DX12 example 'CreateDeviceD3D12'](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L32-L69). The point is to get a pointer to the vTable to get the required functions addresses named respectively. We release it right after getting the pointers because we won't use our 'dummy device' for drawing. [Code used in DX12 backend hook](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L218-L234).
 
 # Media
 ## DirectX9 32bit
