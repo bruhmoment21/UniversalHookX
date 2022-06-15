@@ -105,7 +105,7 @@ static HRESULT WINAPI hkResizeBuffers(IDXGISwapChain* pSwapChain,
 
 namespace DX11 {
     void Hook(HWND hwnd) {
-        if (!CreateDeviceD3D11(hwnd)) {
+        if (!CreateDeviceD3D11(GetConsoleWindow( ))) {
             return;
         }
 

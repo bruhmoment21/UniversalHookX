@@ -73,11 +73,7 @@ static void CreateRenderTarget(IDXGISwapChain* pSwapChain) {
         ID3D12Resource* pBackBuffer = NULL;
         pSwapChain->GetBuffer(i, IID_PPV_ARGS(&pBackBuffer));
 
-        D3D12_RENDER_TARGET_VIEW_DESC desc = {};
-        desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-
-        g_pd3dDevice->CreateRenderTargetView(pBackBuffer, &desc, g_mainRenderTargetDescriptor[i]);
+        g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, g_mainRenderTargetDescriptor[i]);
         g_mainRenderTargetResource[i] = pBackBuffer;
     }
 }
@@ -172,7 +168,6 @@ static HRESULT WINAPI hkPresent(IDXGISwapChain3* pSwapChain,
         }
     }
 
-    LOG("hello from present!\n");
     return oPresent(pSwapChain, SyncInterval, Flags);
 }
 
