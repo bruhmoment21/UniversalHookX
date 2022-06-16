@@ -24,6 +24,8 @@ We create a 'dummy device' and a 'dummy swapchain' (for DirectX10 and higher) wi
 ## DirectX9 32bit
 ![image](https://user-images.githubusercontent.com/53657322/173915161-0c683d0f-7a50-4272-ad4d-3b4e1aaa7939.png)
 ![image](https://user-images.githubusercontent.com/53657322/173915463-4d19c09c-ab47-443c-9efa-2af49decd3aa.png)
+## DirectX10 32bit
+![image](https://user-images.githubusercontent.com/53657322/173996412-d842d04c-6ed9-4cd8-87b3-e83fca8dfabe.png)
 ## DirectX11 64bit
 ![image](https://user-images.githubusercontent.com/53657322/173915680-598f9a9c-9f63-457d-a9dd-ee5b04da1f31.png)
 ## DirectX12 64bit
