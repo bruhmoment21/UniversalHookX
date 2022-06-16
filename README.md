@@ -3,7 +3,7 @@ Universal graphical hook for Windows apps that will display an [ImGui Demo Windo
 
 ## Usage
 Call `Utils::SetRenderingBackground(eRenderingBackground)` in DllMain as shown [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/dllmain.cpp#L19).
-You must do this or the DLL won't know what to hook or how to hook. [What is eRenderingBackend?](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/utils/utils.hpp#L3-L10).
+You must do this or the DLL won't know what to hook or how to hook. [What is eRenderingBackend?](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/utils/utils.hpp#L3).
 
 ## Purpose
 The purpose of this library is to show how to hook different backends to display ImGui, the code should be easy to understand as I tried to make everything seem almost the same, see [backends folder](https://github.com/bruhmoment21/UniversalHookX/tree/main/UniversalHookX/src/hooks/backend).
@@ -13,7 +13,7 @@ The purpose of this library is to show how to hook different backends to display
 - [x] DirectX10
 - [x] DirectX11
 - [x] DirectX12
-- [ ] OpenGL
+- [x] OpenGL
 - [ ] Vulkan
 
 # How it works
@@ -30,9 +30,16 @@ We create a 'dummy device' and a 'dummy swapchain' (for DirectX10 and higher) wi
 ![image](https://user-images.githubusercontent.com/53657322/173915680-598f9a9c-9f63-457d-a9dd-ee5b04da1f31.png)
 ## DirectX12 64bit
 ![image](https://user-images.githubusercontent.com/53657322/173922887-f56629da-58bd-4ce6-b818-211c74cad6ab.png)
+## OpenGL 32bit + 64bit
+![image](https://user-images.githubusercontent.com/53657322/174028360-a59d71e8-de1a-4e79-8df4-8dd40b10775e.png)
+![image](https://user-images.githubusercontent.com/53657322/174029463-a7e24813-850b-4261-86b7-4c26fb18a34b.png)
 
 # Other
-Feel free to open an issue if something isn't working, personally I couldn't get it to work on 'Far Cry 6'. **Resizing** works because [ResizeBuffers](https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-resizebuffers) is hooked. Input handling is up to you to decide how to make/use it. The WndProc hook is [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L16). It should support both 64bit and 32bit architectures.
+Feel free to open an issue if something isn't working, personally I couldn't get it to work on 'Far Cry 6'. **Resizing** works because [ResizeBuffers](https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-resizebuffers) is hooked. Input handling is up to you to decide how to make/use it. The WndProc hook is [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L36). It should support both 64bit and 32bit architectures.
+
+# Known issues
+Try pressing [HOME](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L41-L44) to rehook and see if things got better.  
+[Minecraft (tested on 1.19) - menu textures glitched](https://user-images.githubusercontent.com/53657322/174030423-aa92e780-057e-451d-9d60-ddd20f668d03.png)
 
 ## Dependencies
 [MinHook](https://github.com/TsudaKageyu/minhook) - TsudaKageyu - Used for hooking (trampoline method).  
