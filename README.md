@@ -19,7 +19,8 @@ The purpose of this library is to show how to hook different backends to display
 # How it works
 ## DirectX
 We create a 'dummy device' and a 'dummy swapchain' (for DirectX10 and higher) with a handle to the [console window](https://docs.microsoft.com/en-us/windows/console/getconsolewindow). See the `CreateDeviceD3DX` function in every DirectX backend. [See DX12 example 'CreateDeviceD3D12'](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L32-L69). The point is to get a pointer to the vTable to get the required functions addresses. We release it right after getting the pointers because we won't use our 'dummy device' and 'dummy swapchain' for drawing. [Code used in DX12 backend hook](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L218-L234).
-
+## OpenGL
+We hook wglSwapBuffers which is an exported function in opengl32.dll. [See code used in OpenGL backend](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/opengl/hook_opengl.cpp#L37)
 # Media
 ## DirectX9 32bit
 ![image](https://user-images.githubusercontent.com/53657322/173915161-0c683d0f-7a50-4272-ad4d-3b4e1aaa7939.png)
@@ -37,7 +38,7 @@ We create a 'dummy device' and a 'dummy swapchain' (for DirectX10 and higher) wi
 # Other
 Feel free to open an issue if something isn't working, personally I couldn't get it to work on 'Far Cry 6'. **Resizing** works because [ResizeBuffers](https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-resizebuffers) is hooked. Input handling is up to you to decide how to make/use it. The WndProc hook is [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L36). It should support both 64bit and 32bit architectures.
 
-# Known issues
+## Known issues
 Try pressing [HOME](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L41-L44) to rehook and see if things got better.  
 [Minecraft (tested on 1.19) - menu textures glitched](https://user-images.githubusercontent.com/53657322/174030423-aa92e780-057e-451d-9d60-ddd20f668d03.png)
 
