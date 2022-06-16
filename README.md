@@ -2,7 +2,7 @@
 Universal graphical hook for Windows apps that will display an [ImGui Demo Window](https://github.com/bruhmoment21/UniversalHookX/blob/8bb97657c53a802d7db20feec65cd43ed8bfe0c8/UniversalHookX/src/dependencies/imgui/imgui_demo.cpp#L266) as an example.
 
 ## Usage
-Call `Utils::SetRenderingBackground(eRenderingBackground)` in DllMain as shown [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/dllmain.cpp#L32).
+Call `Utils::SetRenderingBackground(eRenderingBackground)` in DllMain as shown [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/dllmain.cpp#L19).
 You must do this or the DLL won't know what to hook or how to hook. [What is eRenderingBackend?](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/utils/utils.hpp#L3-L10).
 
 ## Purpose
