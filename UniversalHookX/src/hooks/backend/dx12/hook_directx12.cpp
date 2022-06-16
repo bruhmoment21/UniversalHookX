@@ -256,7 +256,7 @@ static void CleanupRenderTarget( ) {
 static void CleanupDeviceD3D12( ) {
     CleanupRenderTarget( );
 
-    if (g_pSwapChain) { g_pSwapChain->SetFullscreenState(false, NULL); g_pSwapChain->Release( ); g_pSwapChain = NULL; }
+    if (g_pSwapChain) { g_pSwapChain->Release( ); g_pSwapChain = NULL; }
     for (UINT i = 0; i < NUM_BACK_BUFFERS; i++)
         if (g_commandAllocators[i]) { g_commandAllocators[i]->Release(); g_commandAllocators[i] = NULL; }
     if (g_pd3dCommandList) { g_pd3dCommandList->Release( ); g_pd3dCommandList = NULL; }
