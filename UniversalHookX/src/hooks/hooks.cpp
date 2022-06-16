@@ -26,8 +26,12 @@ static DWORD WINAPI ReinitializeGraphicalHooks(LPVOID lpParam) {
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 	
+	H::bShuttingDown = true;
+
 	H::Free( );
 	H::Init( );
+
+	H::bShuttingDown = false;
 
 	return 0;
 }
