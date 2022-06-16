@@ -16,6 +16,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved) {
 	if (fdwReason == DLL_PROCESS_ATTACH) {
 		DisableThreadLibraryCalls(hinstDLL);
 		
+		U::SetRenderingBackground(DIRECTX12);
+
 		HANDLE hHandle = CreateThread(NULL, 0, OnProcessAttach, hinstDLL, 0, NULL);
 		if (hHandle != NULL) CloseHandle(hHandle);
 	} else if (fdwReason == DLL_PROCESS_DETACH) {
@@ -29,12 +31,11 @@ DWORD WINAPI OnProcessAttach(LPVOID lpParam) {
 	MH_Initialize( );
 	
 	Console::Alloc( );
-	U::SetRenderingBackground(DIRECTX12);
 	LOG("[+] Rendering backend: %s\n", U::RenderingBackendToStr( ));
 	if (U::GetRenderingBackend( ) == NONE) {
 		LOG("[!] Will unload in 2 seconds...\nMake sure U::SetRenderingBackground( ) is called.\n");
 		std::this_thread::sleep_for(std::chrono::seconds(2));
-		FreeLibraryAndExitThread((HMODULE)(lpParam), 0);
+		FreeLibraryAndExitThread(reinterpret_cast<HMODULE>(lpParam), 0);
 		return 0;
 	}
 
