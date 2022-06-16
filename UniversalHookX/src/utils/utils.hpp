@@ -7,6 +7,8 @@ enum RenderingBackend_t {
 	DIRECTX10,
 	DIRECTX11,
 	DIRECTX12,
+
+	OPENGL,
 };
 
 namespace Utils {

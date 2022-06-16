@@ -223,15 +223,15 @@ namespace DX12 {
             void* fnExecuteCommandLists = pCommandQueueVTable[10];
 
             if (g_pd3dCommandQueue) { g_pd3dCommandQueue->Release( ); g_pd3dCommandQueue = NULL; }
-            CleanupDeviceD3D12( );   
+            CleanupDeviceD3D12( );
 
-            MH_CreateHook(reinterpret_cast<void**>(fnPresent), &hkPresent, reinterpret_cast<void**>(&oPresent));
-            MH_CreateHook(reinterpret_cast<void**>(fnResizeBuffer), &hkResizeBuffers, reinterpret_cast<void**>(&oResizeBuffers));
-            MH_CreateHook(reinterpret_cast<void**>(fnExecuteCommandLists), &hkExecuteCommandLists, reinterpret_cast<void**>(&oExecuteCommandLists));
+            static MH_STATUS presentStatus = MH_CreateHook(reinterpret_cast<void**>(fnPresent), &hkPresent, reinterpret_cast<void**>(&oPresent));
+            static MH_STATUS resizeStatus = MH_CreateHook(reinterpret_cast<void**>(fnResizeBuffer), &hkResizeBuffers, reinterpret_cast<void**>(&oResizeBuffers));
+            static MH_STATUS eclStatus = MH_CreateHook(reinterpret_cast<void**>(fnExecuteCommandLists), &hkExecuteCommandLists, reinterpret_cast<void**>(&oExecuteCommandLists));
 
             MH_EnableHook(fnPresent);
             MH_EnableHook(fnResizeBuffer);
-            MH_EnableHook(fnExecuteCommandLists);         
+            MH_EnableHook(fnExecuteCommandLists);
         }
     }
 

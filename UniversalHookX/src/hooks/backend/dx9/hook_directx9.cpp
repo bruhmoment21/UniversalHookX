@@ -109,8 +109,8 @@ namespace DX9 {
             g_pd3dDevice->Release( );
             g_pD3D->Release( );
 
-            MH_CreateHook(reinterpret_cast<void**>(fnReset), &hkReset, reinterpret_cast<void**>(&oReset));
-            MH_CreateHook(reinterpret_cast<void**>(fnPresent), &hkPresent, reinterpret_cast<void**>(&oPresent));
+            static MH_STATUS resetStatus = MH_CreateHook(reinterpret_cast<void**>(fnReset), &hkReset, reinterpret_cast<void**>(&oReset));
+            static MH_STATUS presentStatus = MH_CreateHook(reinterpret_cast<void**>(fnPresent), &hkPresent, reinterpret_cast<void**>(&oPresent));
 
             MH_EnableHook(fnReset);
             MH_EnableHook(fnPresent); 

@@ -49,6 +49,8 @@ namespace Utils {
 			RB2STR(DIRECTX10);
 			RB2STR(DIRECTX11);
 			RB2STR(DIRECTX12);
+
+			RB2STR(OPENGL);
 		}
 
 		return "NONE/UNKNOWN";

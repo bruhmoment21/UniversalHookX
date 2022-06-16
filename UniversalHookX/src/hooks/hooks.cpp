@@ -1,9 +1,14 @@
+#include <cstdio>
+#include <thread>
+
 #include "hooks.hpp"
 
 #include "backend/dx9/hook_directx9.hpp"
 #include "backend/dx10/hook_directx10.hpp"
 #include "backend/dx11/hook_directx11.hpp"
 #include "backend/dx12/hook_directx12.hpp"
+
+#include "backend/opengl/hook_opengl.hpp"
 
 #include "../utils/utils.hpp"
 
@@ -12,16 +17,39 @@
 
 static HWND g_hWindow = NULL;
 
+static DWORD WINAPI ReinitializeGraphicalHooks(LPVOID lpParam) {
+	LOG("[!] Hooks will reinitialize!\n");
+
+	HWND hNewWindow = U::GetCurrentProcessHWND( );
+	while (hNewWindow == reinterpret_cast<HWND>(lpParam)) {
+		hNewWindow = U::GetCurrentProcessHWND( );
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
+	
+	H::Free( );
+	H::Init( );
+
+	return 0;
+}
+
 static WNDPROC oWndProc;
 static LRESULT WINAPI WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	if (uMsg == WM_KEYDOWN) {
 		if (wParam == VK_INSERT) {
 			H::bShowDemoWindow = !H::bShowDemoWindow;
+			return 0;
+		} else if (wParam == VK_HOME) {
+			HANDLE hHandle = CreateThread(NULL, 0, ReinitializeGraphicalHooks, NULL, 0, NULL);
+			if (hHandle != NULL) CloseHandle(hHandle);
+			return 0;
 		} else if (wParam == VK_END) {
 			H::bShuttingDown = true;
 			U::UnloadDLL( );
 			return 0;
 		}
+	} else if (uMsg == WM_DESTROY) {
+		HANDLE hHandle = CreateThread(NULL, 0, ReinitializeGraphicalHooks, hWnd, 0, NULL);
+		if (hHandle != NULL) CloseHandle(hHandle);
 	}
 
 	LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -42,7 +70,7 @@ namespace Hooks {
 		g_hWindow = U::GetCurrentProcessHWND( );
 
 #ifdef DISABLE_LOGGING_CONSOLE
-		bool bNoConsole = GetConsoleWindow() == NULL;
+		bool bNoConsole = GetConsoleWindow( ) == NULL;
 		if (bNoConsole) {
 			AllocConsole( );
 		}
@@ -50,10 +78,11 @@ namespace Hooks {
 
 		RenderingBackend_t eRenderingBackend = U::GetRenderingBackend( );
 		switch (eRenderingBackend) {
-			case DIRECTX9: DX9::Hook(g_hWindow); break;
+			case DIRECTX9:	DX9::Hook(g_hWindow); break;
 			case DIRECTX10: DX10::Hook(g_hWindow); break;
 			case DIRECTX11: DX11::Hook(g_hWindow); break;
 			case DIRECTX12: DX12::Hook(g_hWindow); break;
+			case OPENGL:	GL::Hook(g_hWindow); break;
 		}
 
 #ifdef DISABLE_LOGGING_CONSOLE
@@ -70,10 +99,11 @@ namespace Hooks {
 
 		RenderingBackend_t eRenderingBackend = U::GetRenderingBackend( );
 		switch (eRenderingBackend) {
-			case DIRECTX9: DX9::Unhook( ); break;
+			case DIRECTX9:	DX9::Unhook( ); break;
 			case DIRECTX10: DX10::Unhook( ); break;
 			case DIRECTX11: DX11::Unhook( ); break;
 			case DIRECTX12: DX12::Unhook( ); break;
+			case OPENGL:	GL::Unhook( ); break;
 		}
 
 		if (oWndProc) {

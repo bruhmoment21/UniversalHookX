@@ -127,8 +127,8 @@ namespace DX10 {
 
             CleanupDeviceD3D10( );
 
-            MH_CreateHook(reinterpret_cast<void**>(fnPresent), &hkPresent, reinterpret_cast<void**>(&oPresent));
-            MH_CreateHook(reinterpret_cast<void**>(fnResizeBuffer), &hkResizeBuffers, reinterpret_cast<void**>(&oResizeBuffers));
+            static MH_STATUS presentStatus = MH_CreateHook(reinterpret_cast<void**>(fnPresent), &hkPresent, reinterpret_cast<void**>(&oPresent));
+            static MH_STATUS resizeStatus = MH_CreateHook(reinterpret_cast<void**>(fnResizeBuffer), &hkResizeBuffers, reinterpret_cast<void**>(&oResizeBuffers));
 
             MH_EnableHook(fnPresent);
             MH_EnableHook(fnResizeBuffer);
