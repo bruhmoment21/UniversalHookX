@@ -33,7 +33,7 @@ static DWORD WINAPI _UnloadDLL(LPVOID lpParam) {
 }
 
 namespace Utils {
-	void SetRenderingBackground(RenderingBackend_t eRenderingBackground) {
+	void SetRenderingBackend(RenderingBackend_t eRenderingBackground) {
 		g_eRenderingBackend = eRenderingBackground;
 	}
 
@@ -56,21 +56,21 @@ namespace Utils {
 		return "NONE/UNKNOWN";
 	}
 
-	HWND GetCurrentProcessHWND( ) {
+	HWND GetProcessWindow( ) {
 		HWND hwnd = nullptr;
 		EnumWindows(::EnumWindowsCallback, reinterpret_cast<LPARAM>(&hwnd));
 
 		while (!hwnd) {
 			EnumWindows(::EnumWindowsCallback, reinterpret_cast<LPARAM>(&hwnd));
 			LOG("[!] Waiting for window to appear.\n");
-			std::this_thread::sleep_for(std::chrono::seconds(1));
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
 		}
 
 		return hwnd;
 	}
 
 	void UnloadDLL( ) {
-		HANDLE hThread = CreateThread(nullptr, 0, _UnloadDLL, nullptr, 0, nullptr);
+		HANDLE hThread = CreateThread(NULL, 0, _UnloadDLL, NULL, 0, NULL);
 		if (hThread != NULL) CloseHandle(hThread);
 	}
 

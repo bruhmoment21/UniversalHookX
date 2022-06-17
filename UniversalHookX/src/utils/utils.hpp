@@ -12,11 +12,11 @@ enum RenderingBackend_t {
 };
 
 namespace Utils {
-	void SetRenderingBackground(RenderingBackend_t eRenderingBackground);
+	void SetRenderingBackend(RenderingBackend_t eRenderingBackend);
 	RenderingBackend_t GetRenderingBackend( );
 	const char* RenderingBackendToStr( );
 
-	HWND GetCurrentProcessHWND( );
+	HWND GetProcessWindow( );
 	void UnloadDLL( );
 	
 	HMODULE GetCurrentImageBase( );

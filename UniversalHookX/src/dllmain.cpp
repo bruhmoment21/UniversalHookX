@@ -16,7 +16,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved) {
 	if (fdwReason == DLL_PROCESS_ATTACH) {
 		DisableThreadLibraryCalls(hinstDLL);
 		
-		U::SetRenderingBackground(DIRECTX12);
+		U::SetRenderingBackend(DIRECTX12);
 
 		HANDLE hHandle = CreateThread(NULL, 0, OnProcessAttach, hinstDLL, 0, NULL);
 		if (hHandle != NULL) CloseHandle(hHandle);

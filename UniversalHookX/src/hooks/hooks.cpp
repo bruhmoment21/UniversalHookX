@@ -20,10 +20,9 @@ static HWND g_hWindow = NULL;
 static DWORD WINAPI ReinitializeGraphicalHooks(LPVOID lpParam) {
 	LOG("[!] Hooks will reinitialize!\n");
 
-	HWND hNewWindow = U::GetCurrentProcessHWND( );
+	HWND hNewWindow = U::GetProcessWindow( );
 	while (hNewWindow == reinterpret_cast<HWND>(lpParam)) {
-		hNewWindow = U::GetCurrentProcessHWND( );
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		hNewWindow = U::GetProcessWindow( );
 	}
 	
 	H::bShuttingDown = true;
@@ -32,6 +31,7 @@ static DWORD WINAPI ReinitializeGraphicalHooks(LPVOID lpParam) {
 	H::Init( );
 
 	H::bShuttingDown = false;
+	H::bShowDemoWindow = true;
 
 	return 0;
 }
@@ -57,7 +57,7 @@ static LRESULT WINAPI WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 	}
 
 	LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	if (H::bShowDemoWindow) {
+	if (H::bShowDemoWindow && !H::bShuttingDown) {
 		ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
 
 		// (Doesn't work for some games like 'Sid Meier's Civilization VI')
@@ -71,7 +71,7 @@ static LRESULT WINAPI WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 namespace Hooks {
 	void Init( ) {
-		g_hWindow = U::GetCurrentProcessHWND( );
+		g_hWindow = U::GetProcessWindow( );
 
 #ifdef DISABLE_LOGGING_CONSOLE
 		bool bNoConsole = GetConsoleWindow( ) == NULL;

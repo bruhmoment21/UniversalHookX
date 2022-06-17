@@ -3,7 +3,6 @@
 #include <dxgi1_4.h>
 
 #include <memory>
-#include <mutex>
 
 #include "hook_directx12.hpp"
 
@@ -183,6 +182,7 @@ static HRESULT WINAPI hkCreateSwapChainForComposition(IDXGIFactory* pFactory,
 namespace DX12 {
     void Hook(HWND hwnd) {
         if (!CreateDeviceD3D12(GetConsoleWindow( ))) {
+            LOG("[!] CreateDeviceD3D12() failed.\n");
             return;
         }
 
@@ -215,7 +215,6 @@ namespace DX12 {
             void* fnPresent1 = pVTable[22];
 
             void* fnResizeBuffers = pVTable[13];
-            void* fnResizeTarget = pVTable[13];
             void* fnResizeBuffers1 = pVTable[39];
 
             void* fnExecuteCommandLists = pCommandQueueVTable[10];

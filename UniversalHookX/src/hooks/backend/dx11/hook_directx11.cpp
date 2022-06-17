@@ -2,7 +2,6 @@
 #include <d3d11.h>
 
 #include <memory>
-#include <mutex>
 
 #include "hook_directx11.hpp"
 
@@ -20,12 +19,11 @@ static IDXGISwapChain*          g_pSwapChain = NULL;
 
 static void CleanupDeviceD3D11( );
 static void CleanupRenderTarget( );
+static void RenderImGui_DX11(IDXGISwapChain* pSwapChain);
 
 static bool CreateDeviceD3D11(HWND hWnd) {
-    DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
-
     // Create the D3DDevice
-    ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+    DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
     swapChainDesc.Windowed = TRUE;
     swapChainDesc.BufferCount = 2;
     swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -34,11 +32,10 @@ static bool CreateDeviceD3D11(HWND hWnd) {
     swapChainDesc.SampleDesc.Count = 1;
 
     const D3D_FEATURE_LEVEL featureLevels[ ] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0, };
-    HRESULT result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_NULL, NULL, 0, featureLevels, 2, D3D11_SDK_VERSION, &swapChainDesc, &g_pSwapChain, &g_pd3dDevice, nullptr, nullptr);
-    while (result != S_OK) {
-        LOG("[!] D3D11CreateDeviceAndSwapChain() failed. [rv: %lu]\n", result);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_NULL, NULL, 0, featureLevels, 2, D3D11_SDK_VERSION, &swapChainDesc, &g_pSwapChain, &g_pd3dDevice, nullptr, nullptr);
+    HRESULT hr = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_NULL, NULL, 0, featureLevels, 2, D3D11_SDK_VERSION, &swapChainDesc, &g_pSwapChain, &g_pd3dDevice, nullptr, nullptr);
+    if (hr != S_OK) {
+        LOG("[!] D3D11CreateDeviceAndSwapChain() failed. [rv: %lu]\n", hr);
+        return false;
     }
 
     return true;
@@ -61,32 +58,7 @@ static std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain*, UINT, UINT)> oPresent;
 static HRESULT WINAPI hkPresent(IDXGISwapChain* pSwapChain,
                                 UINT SyncInterval,
                                 UINT Flags) {
-    static std::once_flag once;
-    std::call_once(once, [ pSwapChain ]( ) {
-        if (SUCCEEDED(pSwapChain->GetDevice(IID_PPV_ARGS(&g_pd3dDevice)))) {
-            g_pd3dDevice->GetImmediateContext(&g_pd3dDeviceContext);     
-            ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
-        }
-    });
-
-    if (!g_pd3dRenderTarget) {
-        CreateRenderTarget(pSwapChain);
-    }
-
-    if (ImGui::GetCurrentContext( ) && g_pd3dRenderTarget) {
-        ImGui_ImplDX11_NewFrame( );
-        ImGui_ImplWin32_NewFrame( );
-        ImGui::NewFrame( );
-
-        if (H::bShowDemoWindow) {
-            ImGui::ShowDemoWindow( );
-        }
-
-        ImGui::Render( );
-
-        g_pd3dDeviceContext->OMSetRenderTargets(1, &g_pd3dRenderTarget, NULL);
-        ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData( ));
-    }
+    RenderImGui_DX11(pSwapChain);
 
     return oPresent(pSwapChain, SyncInterval, Flags);
 }
@@ -106,6 +78,7 @@ static HRESULT WINAPI hkResizeBuffers(IDXGISwapChain* pSwapChain,
 namespace DX11 {
     void Hook(HWND hwnd) {
         if (!CreateDeviceD3D11(GetConsoleWindow( ))) {
+            LOG("[!] CreateDeviceD3D11() failed.\n");
             return;
         }
 
@@ -161,4 +134,34 @@ static void CleanupDeviceD3D11( ) {
     if (g_pd3dDevice) { g_pd3dDevice->Release( ); g_pd3dDevice = NULL; }
     if (g_pd3dRenderTarget) { g_pd3dRenderTarget->Release( ); g_pd3dRenderTarget = NULL; }
     if (g_pd3dDeviceContext) { g_pd3dDeviceContext->Release( ); g_pd3dDeviceContext = NULL; }
+}
+
+static void RenderImGui_DX11(IDXGISwapChain* pSwapChain) {
+    if (!ImGui::GetIO( ).BackendRendererUserData) {
+        if (SUCCEEDED(pSwapChain->GetDevice(IID_PPV_ARGS(&g_pd3dDevice)))) {
+            g_pd3dDevice->GetImmediateContext(&g_pd3dDeviceContext);
+            ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
+        }
+    }
+
+    if (!H::bShuttingDown) {
+        if (!g_pd3dRenderTarget) {
+            CreateRenderTarget(pSwapChain);
+        }
+
+        if (ImGui::GetCurrentContext( ) && g_pd3dRenderTarget) {
+            ImGui_ImplDX11_NewFrame( );
+            ImGui_ImplWin32_NewFrame( );
+            ImGui::NewFrame( );
+
+            if (H::bShowDemoWindow) {
+                ImGui::ShowDemoWindow( );
+            }
+
+            ImGui::Render( );
+
+            g_pd3dDeviceContext->OMSetRenderTargets(1, &g_pd3dRenderTarget, NULL);
+            ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData( ));
+        }
+    }
 }
