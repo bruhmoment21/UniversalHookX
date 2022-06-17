@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <thread>
+#include <dxgi.h>
 
 #include "utils.hpp"
 
@@ -76,5 +77,13 @@ namespace Utils {
 
 	HMODULE GetCurrentImageBase( ) {
 		return (HINSTANCE)(&__ImageBase);
+	}
+
+	int GetCorrectDXGIFormat(int eCurrentFormat) {
+		switch (eCurrentFormat) {
+			case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB: return DXGI_FORMAT_R8G8B8A8_UNORM;
+		}
+
+		return eCurrentFormat;
 	}
 }

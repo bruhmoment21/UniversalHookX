@@ -20,6 +20,8 @@ namespace Utils {
 	void UnloadDLL( );
 	
 	HMODULE GetCurrentImageBase( );
+
+	int GetCorrectDXGIFormat(int eCurrentFormat);
 }
 
 namespace U = Utils;

@@ -11,6 +11,7 @@
 #include "../../../dependencies/minhook/MinHook.h"
 
 #include "../../../console/console.hpp"
+#include "../../../utils/utils.hpp"
 #include "../../hooks.hpp"
 
 // Data
@@ -68,11 +69,18 @@ static bool CreateDeviceD3D12(HWND hWnd) {
 }
 
 static void CreateRenderTarget(IDXGISwapChain* pSwapChain) {
-    for (UINT i = 0; i < NUM_BACK_BUFFERS; i++) {
+    for (UINT i = 0; i < NUM_BACK_BUFFERS; ++i) {
         ID3D12Resource* pBackBuffer = NULL;
         pSwapChain->GetBuffer(i, IID_PPV_ARGS(&pBackBuffer));
 
-        g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, g_mainRenderTargetDescriptor[i]);
+        DXGI_SWAP_CHAIN_DESC sd;
+        pSwapChain->GetDesc(&sd);
+
+        D3D12_RENDER_TARGET_VIEW_DESC desc = {};
+        desc.Format = static_cast<DXGI_FORMAT>(Utils::GetCorrectDXGIFormat(sd.BufferDesc.Format));
+        desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
+        g_pd3dDevice->CreateRenderTargetView(pBackBuffer, &desc, g_mainRenderTargetDescriptor[i]);
         g_mainRenderTargetResource[i] = pBackBuffer;
     }
 }
@@ -264,7 +272,7 @@ namespace DX12 {
 }
 
 static void CleanupRenderTarget( ) {
-    for (UINT i = 0; i < NUM_BACK_BUFFERS; i++)
+    for (UINT i = 0; i < NUM_BACK_BUFFERS; ++i)
         if (g_mainRenderTargetResource[i]) { g_mainRenderTargetResource[i]->Release( ); g_mainRenderTargetResource[i] = NULL; }
 }
 
@@ -272,7 +280,7 @@ static void CleanupDeviceD3D12( ) {
     CleanupRenderTarget( );
 
     if (g_pSwapChain) { g_pSwapChain->Release( ); g_pSwapChain = NULL; }
-    for (UINT i = 0; i < NUM_BACK_BUFFERS; i++)
+    for (UINT i = 0; i < NUM_BACK_BUFFERS; ++i)
         if (g_commandAllocators[i]) { g_commandAllocators[i]->Release(); g_commandAllocators[i] = NULL; }
     if (g_pd3dCommandList) { g_pd3dCommandList->Release( ); g_pd3dCommandList = NULL; }
     if (g_pd3dRtvDescHeap) { g_pd3dRtvDescHeap->Release( ); g_pd3dRtvDescHeap = NULL; }
@@ -295,7 +303,7 @@ static void RenderImGui_DX12(IDXGISwapChain3* pSwapChain) {
 
                 SIZE_T rtvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
                 D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = g_pd3dRtvDescHeap->GetCPUDescriptorHandleForHeapStart( );
-                for (UINT i = 0; i < NUM_BACK_BUFFERS; i++) {
+                for (UINT i = 0; i < NUM_BACK_BUFFERS; ++i) {
                     g_mainRenderTargetDescriptor[i] = rtvHandle;
                     rtvHandle.ptr += rtvDescriptorSize;
                 }
@@ -310,7 +318,7 @@ static void RenderImGui_DX12(IDXGISwapChain3* pSwapChain) {
                     return;
             }
 
-            for (UINT i = 0; i < NUM_BACK_BUFFERS; i++)
+            for (UINT i = 0; i < NUM_BACK_BUFFERS; ++i)
                 if (g_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&g_commandAllocators[i])) != S_OK)
                     return;
 

@@ -41,6 +41,7 @@ static std::add_pointer_t<HRESULT WINAPI(IDirect3DDevice9*, D3DPRESENT_PARAMETER
 static HRESULT WINAPI hkReset(IDirect3DDevice9* pDevice, 
                               D3DPRESENT_PARAMETERS* pPresentationParameters) {
     ImGui_ImplDX9_InvalidateDeviceObjects( );
+
     return oReset(pDevice, pPresentationParameters);
 }
 
@@ -49,6 +50,7 @@ static HRESULT WINAPI hkResetEx(IDirect3DDevice9* pDevice,
                                 D3DPRESENT_PARAMETERS* pPresentationParameters,
                                 D3DDISPLAYMODEEX* pFullscreenDisplayMode) {
     ImGui_ImplDX9_InvalidateDeviceObjects( );
+
     return oResetEx(pDevice, pPresentationParameters, pFullscreenDisplayMode);
 }
 
