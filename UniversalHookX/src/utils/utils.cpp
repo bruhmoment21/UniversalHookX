@@ -52,6 +52,7 @@ namespace Utils {
 			RB2STR(DIRECTX12);
 
 			RB2STR(OPENGL);
+			RB2STR(VULKAN);
 		}
 
 		return "NONE/UNKNOWN";

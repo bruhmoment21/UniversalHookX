@@ -26,6 +26,8 @@
     <ClCompile Include="src\dependencies\imgui\imgui_impl_dx10.cpp" />
     <ClCompile Include="src\hooks\backend\opengl\hook_opengl.cpp" />
     <ClCompile Include="src\dependencies\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\hooks\backend\vulkan\hook_vulkan.cpp" />
+    <ClCompile Include="src\dependencies\imgui\imgui_impl_vulkan.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\console\console.hpp" />
@@ -57,5 +59,8 @@
     <ClInclude Include="src\hooks\backend\opengl\hook_opengl.hpp" />
     <ClInclude Include="src\dependencies\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="src\dependencies\imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="src\backend.hpp" />
+    <ClInclude Include="src\hooks\backend\vulkan\hook_vulkan.hpp" />
+    <ClInclude Include="src\dependencies\imgui\imgui_impl_vulkan.h" />
   </ItemGroup>
 </Project>

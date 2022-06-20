@@ -1,6 +1,13 @@
+#include "../../../backend.hpp"
+
+#ifdef BACKEND_ENABLE_DX11
 #include <Windows.h>
+
 #include <d3d11.h>
 #include <dxgi1_2.h>
+
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "dxgi.lib")
 
 #include <memory>
 
@@ -279,3 +286,10 @@ static void RenderImGui_DX11(IDXGISwapChain* pSwapChain) {
         }
     }
 }
+#else
+#include <Windows.h>
+namespace DX11 {
+    void Hook(HWND hwnd) { }
+    void Unhook( ) { }
+}
+#endif

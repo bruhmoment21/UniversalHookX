@@ -1,5 +1,7 @@
+#include "../../../backend.hpp"
+
+#ifdef BACKEND_ENABLE_OPENGL
 #include <Windows.h>
-#include <wingdi.h>
 
 #include <memory>
 
@@ -14,7 +16,7 @@
 
 static std::add_pointer_t<BOOL WINAPI(HDC)> oWglSwapBuffers;
 static BOOL WINAPI hkWglSwapBuffers(HDC Hdc) {
-	if (ImGui::GetCurrentContext( )) {
+	if (!H::bShuttingDown && ImGui::GetCurrentContext( )) {
 		if (!ImGui::GetIO( ).BackendRendererUserData)
 			ImGui_ImplOpenGL3_Init( );
 		
@@ -70,3 +72,10 @@ namespace GL {
 		}
 	}
 }
+#else
+#include <Windows.h>
+namespace GL {
+	void Hook(HWND hwnd) { }
+	void Unhook( ) { }
+}
+#endif

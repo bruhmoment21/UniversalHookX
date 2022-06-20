@@ -1,6 +1,13 @@
+#include "../../../backend.hpp"
+
+#ifdef BACKEND_ENABLE_DX10
 #include <Windows.h>
+
 #include <d3d10.h>
 #include <dxgi1_2.h>
+
+#pragma comment(lib, "d3d10.lib")
+#pragma comment(lib, "dxgi.lib")
 
 #include <memory>
 
@@ -275,3 +282,10 @@ static void RenderImGui_DX10(IDXGISwapChain* pSwapChain) {
         }
     }
 }
+#else
+#include <Windows.h>
+namespace DX10 {
+    void Hook(HWND hwnd) { }
+    void Unhook( ) { }
+}
+#endif

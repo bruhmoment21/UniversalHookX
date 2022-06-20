@@ -9,6 +9,7 @@ enum RenderingBackend_t {
 	DIRECTX12,
 
 	OPENGL,
+	VULKAN,
 };
 
 namespace Utils {

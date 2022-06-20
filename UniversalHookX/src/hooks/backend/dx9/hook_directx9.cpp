@@ -1,5 +1,10 @@
+#include "../../../backend.hpp"
+
+#ifdef BACKEND_ENABLE_DX9
 #include <Windows.h>
+
 #include <d3d9.h>
+#pragma comment(lib, "d3d9.lib")
 
 #include <memory>
 
@@ -15,6 +20,7 @@
 static LPDIRECT3D9              g_pD3D = NULL;
 static LPDIRECT3DDEVICE9        g_pd3dDevice = NULL;
 
+static void CleanupDeviceD3D9( );
 static void RenderImGui_DX9(IDirect3DDevice9* pDevice);
 
 static bool CreateDeviceD3D9(HWND hWnd) {
@@ -106,8 +112,7 @@ namespace DX9 {
             void* fnPresent = pVTable[17];
             void* fnPresentEx = pVTable[121];
 
-            g_pd3dDevice->Release( );
-            g_pD3D->Release( );
+            CleanupDeviceD3D9( );
 
             static MH_STATUS resetStatus = MH_CreateHook(reinterpret_cast<void**>(fnReset), &hkReset, reinterpret_cast<void**>(&oReset));
             static MH_STATUS resetExStatus = MH_CreateHook(reinterpret_cast<void**>(fnResetEx), &hkResetEx, reinterpret_cast<void**>(&oResetEx));
@@ -132,6 +137,11 @@ namespace DX9 {
             ImGui::DestroyContext( );
         }
     }
+}
+
+static void CleanupDeviceD3D9( ) {
+    if (g_pD3D) { g_pD3D->Release( ); g_pD3D = NULL; }
+    if (g_pd3dDevice) { g_pd3dDevice->Release( ); g_pd3dDevice = NULL; }
 }
 
 static void RenderImGui_DX9(IDirect3DDevice9* pDevice) {
@@ -163,3 +173,10 @@ static void RenderImGui_DX9(IDirect3DDevice9* pDevice) {
         pDevice->SetRenderState(D3DRS_SRGBWRITEENABLE, SRGBWriteEnable);
     }
 }
+#else
+#include <Windows.h>
+namespace DX9 {
+    void Hook(HWND hwnd) { }
+    void Unhook( ) { }
+}
+#endif

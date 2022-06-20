@@ -74,21 +74,29 @@
     <OutDir>.\bin\</OutDir>
     <IntDir>.\obj\$(Configuration) $(Platform)\</IntDir>
     <TargetName>$(ProjectName) $(Configuration) $(Platform)</TargetName>
+    <IncludePath>$(VULKAN_SDK)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VULKAN_SDK)\Lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>.\bin\</OutDir>
     <IntDir>.\obj\$(Configuration) $(Platform)\</IntDir>
     <TargetName>$(ProjectName) $(Configuration) $(Platform)</TargetName>
+    <IncludePath>$(VULKAN_SDK)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VULKAN_SDK)\Lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>.\bin\</OutDir>
     <IntDir>.\obj\$(Configuration) $(Platform)\</IntDir>
     <TargetName>$(ProjectName) $(Configuration) $(Platform)</TargetName>
+    <IncludePath>$(VULKAN_SDK)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VULKAN_SDK)\Lib32;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>.\bin\</OutDir>
     <IntDir>.\obj\$(Configuration) $(Platform)\</IntDir>
     <TargetName>$(ProjectName) $(Configuration) $(Platform)</TargetName>
+    <IncludePath>$(VULKAN_SDK)\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VULKAN_SDK)\Lib32;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -102,7 +110,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d9.lib;d3d10.lib;d3d11.lib;d3d12.lib;dxgi.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -124,7 +132,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d9.lib;d3d10.lib;d3d11.lib;d3d12.lib;dxgi.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -139,7 +147,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d9.lib;d3d10.lib;d3d11.lib;d3d12.lib;dxgi.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -161,7 +169,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d9.lib;d3d10.lib;d3d11.lib;d3d12.lib;dxgi.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -179,6 +187,7 @@
     </ClCompile>
     <ClCompile Include="src\dependencies\imgui\imgui_impl_dx9.cpp" />
     <ClCompile Include="src\dependencies\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\dependencies\imgui\imgui_impl_vulkan.cpp" />
     <ClCompile Include="src\dependencies\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="src\dependencies\imgui\imgui_tables.cpp" />
     <ClCompile Include="src\dependencies\imgui\imgui_widgets.cpp" />
@@ -198,10 +207,12 @@
     <ClCompile Include="src\hooks\backend\dx9\hook_directx9.cpp" />
     <ClCompile Include="src\hooks\backend\dx10\hook_directx10.cpp" />
     <ClCompile Include="src\hooks\backend\opengl\hook_opengl.cpp" />
+    <ClCompile Include="src\hooks\backend\vulkan\hook_vulkan.cpp" />
     <ClCompile Include="src\hooks\hooks.cpp" />
     <ClCompile Include="src\utils\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\backend.hpp" />
     <ClInclude Include="src\console\console.hpp" />
     <ClInclude Include="src\dependencies\imgui\imconfig.h" />
     <ClInclude Include="src\dependencies\imgui\imgui.h" />
@@ -211,6 +222,7 @@
     <ClInclude Include="src\dependencies\imgui\imgui_impl_dx9.h" />
     <ClInclude Include="src\dependencies\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="src\dependencies\imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="src\dependencies\imgui\imgui_impl_vulkan.h" />
     <ClInclude Include="src\dependencies\imgui\imgui_impl_win32.h" />
     <ClInclude Include="src\dependencies\imgui\imgui_internal.h" />
     <ClInclude Include="src\dependencies\imgui\imstb_rectpack.h" />
@@ -229,6 +241,7 @@
     <ClInclude Include="src\hooks\backend\dx9\hook_directx9.hpp" />
     <ClInclude Include="src\hooks\backend\dx10\hook_directx10.hpp" />
     <ClInclude Include="src\hooks\backend\opengl\hook_opengl.hpp" />
+    <ClInclude Include="src\hooks\backend\vulkan\hook_vulkan.hpp" />
     <ClInclude Include="src\hooks\hooks.hpp" />
     <ClInclude Include="src\utils\utils.hpp" />
   </ItemGroup>

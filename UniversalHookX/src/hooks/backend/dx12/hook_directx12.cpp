@@ -1,6 +1,13 @@
+#include "../../../backend.hpp"
+
+#ifdef BACKEND_ENABLE_DX12
 #include <Windows.h>
+
 #include <d3d12.h>
 #include <dxgi1_4.h>
+
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
 
 #include <memory>
 
@@ -72,16 +79,17 @@ static void CreateRenderTarget(IDXGISwapChain* pSwapChain) {
     for (UINT i = 0; i < NUM_BACK_BUFFERS; ++i) {
         ID3D12Resource* pBackBuffer = NULL;
         pSwapChain->GetBuffer(i, IID_PPV_ARGS(&pBackBuffer));
+        if (pBackBuffer) {
+            DXGI_SWAP_CHAIN_DESC sd;
+            pSwapChain->GetDesc(&sd);
 
-        DXGI_SWAP_CHAIN_DESC sd;
-        pSwapChain->GetDesc(&sd);
+            D3D12_RENDER_TARGET_VIEW_DESC desc = {};
+            desc.Format = static_cast<DXGI_FORMAT>(Utils::GetCorrectDXGIFormat(sd.BufferDesc.Format));
+            desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
-        D3D12_RENDER_TARGET_VIEW_DESC desc = {};
-        desc.Format = static_cast<DXGI_FORMAT>(Utils::GetCorrectDXGIFormat(sd.BufferDesc.Format));
-        desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-
-        g_pd3dDevice->CreateRenderTargetView(pBackBuffer, &desc, g_mainRenderTargetDescriptor[i]);
-        g_mainRenderTargetResource[i] = pBackBuffer;
+            g_pd3dDevice->CreateRenderTargetView(pBackBuffer, &desc, g_mainRenderTargetDescriptor[i]);
+            g_mainRenderTargetResource[i] = pBackBuffer;
+        }
     }
 }
 
@@ -375,3 +383,10 @@ static void RenderImGui_DX12(IDXGISwapChain3* pSwapChain) {
         }
     }
 }
+#else
+#include <Windows.h>
+namespace DX12 {
+    void Hook(HWND hwnd) { }
+    void Unhook( ) { }
+}
+#endif
