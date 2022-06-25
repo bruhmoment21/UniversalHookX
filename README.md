@@ -14,7 +14,7 @@ The purpose of this library is to show how to hook different backends to display
 - [x] DirectX11
 - [x] DirectX12
 - [x] OpenGL
-- [ ] Vulkan
+- [x] Vulkan
 
 # How it works
 ## DirectX
@@ -34,13 +34,16 @@ We hook wglSwapBuffers which is an exported function in opengl32.dll. [See code 
 ## OpenGL 32bit + 64bit
 ![image](https://user-images.githubusercontent.com/53657322/174028360-a59d71e8-de1a-4e79-8df4-8dd40b10775e.png)
 ![image](https://user-images.githubusercontent.com/53657322/174029463-a7e24813-850b-4261-86b7-4c26fb18a34b.png)
+## Vulkan
+![image](https://user-images.githubusercontent.com/53657322/175766688-ba886301-fa70-4ddd-85e0-aaa3cecab250.png)
 
 # Other
 Feel free to open an issue if something isn't working. **Resizing** works because [ResizeBuffers](https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-resizebuffers) is hooked. Input handling is up to you to decide how to make/use it. The WndProc hook is [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L40). It should support both 64bit and 32bit architectures.
 
 ## Known issues
 Try pressing [HOME](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L45-L48) to rehook and see if things get better.  
-[Minecraft (tested on 1.19) - menu textures glitched](https://user-images.githubusercontent.com/53657322/174030423-aa92e780-057e-451d-9d60-ddd20f668d03.png)
+[Minecraft (tested on 1.19) - menu textures glitched](https://user-images.githubusercontent.com/53657322/174030423-aa92e780-057e-451d-9d60-ddd20f668d03.png)  
+Vulkan - You will have a black background everytime you open menu. (I don't know how to fix this.)
 
 ## Dependencies
 [MinHook](https://github.com/TsudaKageyu/minhook) - TsudaKageyu - Used for hooking (trampoline method).  
