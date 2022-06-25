@@ -47,4 +47,5 @@ Vulkan - You will have a black background everytime you open menu. (I don't know
 
 ## Dependencies
 [MinHook](https://github.com/TsudaKageyu/minhook) - TsudaKageyu - Used for hooking (trampoline method).  
-[ImGui](https://github.com/ocornut/imgui) - ocornut - self-explanatory.
+[ImGui](https://github.com/ocornut/imgui) - ocornut - self-explanatory.  
+[Vulkan SDK](https://vulkan.lunarg.com/) - for the Vulkan API.
