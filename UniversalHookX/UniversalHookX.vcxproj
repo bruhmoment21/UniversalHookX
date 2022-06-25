@@ -187,7 +187,6 @@
     </ClCompile>
     <ClCompile Include="src\dependencies\imgui\imgui_impl_dx9.cpp" />
     <ClCompile Include="src\dependencies\imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="src\dependencies\imgui\imgui_impl_vulkan.cpp" />
     <ClCompile Include="src\dependencies\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="src\dependencies\imgui\imgui_tables.cpp" />
     <ClCompile Include="src\dependencies\imgui\imgui_widgets.cpp" />
@@ -222,7 +221,6 @@
     <ClInclude Include="src\dependencies\imgui\imgui_impl_dx9.h" />
     <ClInclude Include="src\dependencies\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="src\dependencies\imgui\imgui_impl_opengl3_loader.h" />
-    <ClInclude Include="src\dependencies\imgui\imgui_impl_vulkan.h" />
     <ClInclude Include="src\dependencies\imgui\imgui_impl_win32.h" />
     <ClInclude Include="src\dependencies\imgui\imgui_internal.h" />
     <ClInclude Include="src\dependencies\imgui\imstb_rectpack.h" />

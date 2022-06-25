@@ -1,4 +1,5 @@
 #include "../../../backend.hpp"
+#include "../../../console/console.hpp"
 
 #ifdef BACKEND_ENABLE_DX12
 #include <Windows.h>
@@ -17,7 +18,6 @@
 #include "../../../dependencies/imgui/imgui_impl_win32.h"
 #include "../../../dependencies/minhook/MinHook.h"
 
-#include "../../../console/console.hpp"
 #include "../../../utils/utils.hpp"
 #include "../../hooks.hpp"
 
@@ -386,7 +386,7 @@ static void RenderImGui_DX12(IDXGISwapChain3* pSwapChain) {
 #else
 #include <Windows.h>
 namespace DX12 {
-    void Hook(HWND hwnd) { }
+    void Hook(HWND hwnd) { LOG("[!] DirectX12 backend is not enabled!\n"); }
     void Unhook( ) { }
 }
 #endif

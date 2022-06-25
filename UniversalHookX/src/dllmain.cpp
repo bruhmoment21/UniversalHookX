@@ -1,5 +1,4 @@
 #include <Windows.h>
-#include <cstdio>
 #include <thread>
 
 #include "console/console.hpp"

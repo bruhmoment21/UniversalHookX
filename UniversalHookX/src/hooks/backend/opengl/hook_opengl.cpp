@@ -1,4 +1,5 @@
 #include "../../../backend.hpp"
+#include "../../../console/console.hpp"
 
 #ifdef BACKEND_ENABLE_OPENGL
 #include <Windows.h>
@@ -11,7 +12,6 @@
 #include "../../../dependencies/imgui/imgui_impl_win32.h"
 #include "../../../dependencies/minhook/MinHook.h"
 
-#include "../../../console/console.hpp"
 #include "../../hooks.hpp"
 
 static std::add_pointer_t<BOOL WINAPI(HDC)> oWglSwapBuffers;
@@ -75,7 +75,7 @@ namespace GL {
 #else
 #include <Windows.h>
 namespace GL {
-	void Hook(HWND hwnd) { }
+	void Hook(HWND hwnd) { LOG("[!] OpenGL backend is not enabled!\n"); }
 	void Unhook( ) { }
 }
 #endif

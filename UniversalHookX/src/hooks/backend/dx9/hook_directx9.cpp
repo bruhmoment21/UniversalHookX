@@ -1,4 +1,5 @@
 #include "../../../backend.hpp"
+#include "../../../console/console.hpp"
 
 #ifdef BACKEND_ENABLE_DX9
 #include <Windows.h>
@@ -14,7 +15,6 @@
 #include "../../../dependencies/imgui/imgui_impl_win32.h"
 #include "../../../dependencies/minhook/MinHook.h"
 
-#include "../../../console/console.hpp"
 #include "../../hooks.hpp"
 
 static LPDIRECT3D9              g_pD3D = NULL;
@@ -176,7 +176,7 @@ static void RenderImGui_DX9(IDirect3DDevice9* pDevice) {
 #else
 #include <Windows.h>
 namespace DX9 {
-    void Hook(HWND hwnd) { }
+    void Hook(HWND hwnd) { LOG("[!] DirectX9 backend is not enabled!\n"); }
     void Unhook( ) { }
 }
 #endif
