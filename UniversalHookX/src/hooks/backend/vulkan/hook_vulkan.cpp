@@ -148,8 +148,6 @@ static bool CreateDeviceVK( ) {
 }
 
 static bool CreateRenderTarget(VkDevice device, VkSwapchainKHR swapchain) {
-	g_bRebuildBuffers = false;
-
 	uint32_t uImageCount;
 	vkGetSwapchainImagesKHR(device, swapchain, &uImageCount, NULL);
 
@@ -324,6 +322,7 @@ namespace VK {
 		}
 
 		CleanupDeviceVK( );
+		g_bRebuildBuffers = true;
 	}
 }
 
@@ -334,8 +333,6 @@ static void CleanupDeviceVK( ) {
 		if (g_Frames[i].BackbufferView) { vkDestroyImageView(g_Device, g_Frames[i].BackbufferView, g_Allocator); g_Frames[i].BackbufferView = VK_NULL_HANDLE; };
 		if (g_Frames[i].Framebuffer) { vkDestroyFramebuffer(g_Device, g_Frames[i].Framebuffer, g_Allocator); g_Frames[i].Framebuffer = VK_NULL_HANDLE; };
 	}
-
-	g_bRebuildBuffers = true;
 }
 
 static void RenderImGui_VK(VkQueue queue, const VkPresentInfoKHR* pPresentInfo) {
@@ -353,6 +350,8 @@ static void RenderImGui_VK(VkQueue queue, const VkPresentInfoKHR* pPresentInfo) 
 		for (uint32_t i = 0; i < pPresentInfo->swapchainCount; ++i) {
 			VkSwapchainKHR swapchain = pPresentInfo->pSwapchains[i];
 			if (g_bRebuildBuffers) {
+				g_bRebuildBuffers = false;
+
 				CleanupDeviceVK( );
 				CreateRenderTarget(g_Device, swapchain);
 			}
