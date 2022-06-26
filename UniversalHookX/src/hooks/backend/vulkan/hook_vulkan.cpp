@@ -336,92 +336,93 @@ static void CleanupDeviceVK( ) {
 }
 
 static void RenderImGui_VK(VkQueue queue, const VkPresentInfoKHR* pPresentInfo) {
-	if (g_Device && !H::bShuttingDown) {
-		if (!ImGui::GetCurrentContext( )) {
-			ImGui::CreateContext( );
-			ImGui_ImplWin32_Init(g_hwnd);
+	if (!g_Device || H::bShuttingDown)
+		return;
 
-			ImGuiIO& io = ImGui::GetIO( );
+	if (!ImGui::GetCurrentContext( )) {
+		ImGui::CreateContext( );
+		ImGui_ImplWin32_Init(g_hwnd);
 
-			io.IniFilename = nullptr;
-			io.LogFilename = nullptr;
+		ImGuiIO& io = ImGui::GetIO( );
+
+		io.IniFilename = nullptr;
+		io.LogFilename = nullptr;
+	}
+
+	for (uint32_t i = 0; i < pPresentInfo->swapchainCount; ++i) {
+		VkSwapchainKHR swapchain = pPresentInfo->pSwapchains[i];
+		if (g_bRebuildBuffers) {
+			g_bRebuildBuffers = false;
+
+			CleanupDeviceVK( );
+			CreateRenderTarget(g_Device, swapchain);
 		}
 
-		for (uint32_t i = 0; i < pPresentInfo->swapchainCount; ++i) {
-			VkSwapchainKHR swapchain = pPresentInfo->pSwapchains[i];
-			if (g_bRebuildBuffers) {
-				g_bRebuildBuffers = false;
+		ImGui_ImplVulkanH_Frame* fd = &g_Frames[pPresentInfo->pImageIndices[i]];
+		{
+			vkResetCommandBuffer(fd->CommandBuffer, 0);
 
-				CleanupDeviceVK( );
-				CreateRenderTarget(g_Device, swapchain);
-			}
+			VkCommandBufferBeginInfo info = {};
+			info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+			info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-			ImGui_ImplVulkanH_Frame* fd = &g_Frames[pPresentInfo->pImageIndices[i]];
-			{
-				vkResetCommandBuffer(fd->CommandBuffer, 0);
+			vkBeginCommandBuffer(fd->CommandBuffer, &info);
+		}
+		{
+			VkRenderPassBeginInfo info = {};
+			info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			info.renderPass = g_RenderPass;
+			info.framebuffer = fd->Framebuffer;
+			info.renderArea.extent.width = 3840;
+			info.renderArea.extent.height = 2160;
 
-				VkCommandBufferBeginInfo info = {};
-				info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-				info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+			vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
+		}
 
-				vkBeginCommandBuffer(fd->CommandBuffer, &info);
-			}
-			{
-				VkRenderPassBeginInfo info = {};
-				info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-				info.renderPass = g_RenderPass;
-				info.framebuffer = fd->Framebuffer;
-				info.renderArea.extent.width = 3840;
-				info.renderArea.extent.height = 2160;
+		if (!ImGui::GetIO( ).BackendRendererUserData) {
+			ImGui_ImplVulkan_InitInfo init_info = {};
+			init_info.Instance = g_Instance;
+			init_info.PhysicalDevice = g_PhysicalDevice;
+			init_info.Device = g_Device;
+			init_info.QueueFamily = g_QueueFamily;
+			init_info.Queue = queue;
+			init_info.PipelineCache = g_PipelineCache;
+			init_info.DescriptorPool = g_DescriptorPool;
+			init_info.Subpass = 0;
+			init_info.MinImageCount = g_MinImageCount;
+			init_info.ImageCount = g_MinImageCount;
+			init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+			init_info.Allocator = g_Allocator;
+			ImGui_ImplVulkan_Init(&init_info, g_RenderPass);
 
-				vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
-			}
+			ImGui_ImplVulkan_CreateFontsTexture(fd->CommandBuffer);
+			ImGui_ImplVulkan_DestroyFontUploadObjects( );
+		}
 
-			if (!ImGui::GetIO( ).BackendRendererUserData) {
-				ImGui_ImplVulkan_InitInfo init_info = {};
-				init_info.Instance = g_Instance;
-				init_info.PhysicalDevice = g_PhysicalDevice;
-				init_info.Device = g_Device;
-				init_info.QueueFamily = g_QueueFamily;
-				init_info.Queue = queue;
-				init_info.PipelineCache = g_PipelineCache;
-				init_info.DescriptorPool = g_DescriptorPool;
-				init_info.Subpass = 0;
-				init_info.MinImageCount = g_MinImageCount;
-				init_info.ImageCount = g_MinImageCount;
-				init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-				init_info.Allocator = g_Allocator;
-				ImGui_ImplVulkan_Init(&init_info, g_RenderPass);
+		ImGui_ImplVulkan_NewFrame( );
+		ImGui_ImplWin32_NewFrame( );
+		ImGui::NewFrame( );
 
-				ImGui_ImplVulkan_CreateFontsTexture(fd->CommandBuffer);
-				ImGui_ImplVulkan_DestroyFontUploadObjects( );
-			}
+		if (H::bShowDemoWindow) {
+			ImGui::ShowDemoWindow( );
+		}
 
-			ImGui_ImplVulkan_NewFrame( );
-			ImGui_ImplWin32_NewFrame( );
-			ImGui::NewFrame( );
+		ImGui::Render( );
 
-			if (H::bShowDemoWindow) {
-				ImGui::ShowDemoWindow( );
-			}
+		// Record dear imgui primitives into command buffer
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData( ), fd->CommandBuffer);
 
-			ImGui::Render( );
+		// Submit command buffer
+		vkCmdEndRenderPass(fd->CommandBuffer);
+		{
+			VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+			VkSubmitInfo info = {};
+			info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			info.commandBufferCount = 1;
+			info.pCommandBuffers = &fd->CommandBuffer;
 
-			// Record dear imgui primitives into command buffer
-			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData( ), fd->CommandBuffer);
-
-			// Submit command buffer
-			vkCmdEndRenderPass(fd->CommandBuffer);
-			{
-				VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-				VkSubmitInfo info = {};
-				info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-				info.commandBufferCount = 1;
-				info.pCommandBuffers = &fd->CommandBuffer;
-
-				vkEndCommandBuffer(fd->CommandBuffer);
-				vkQueueSubmit(queue, 1, &info, NULL);
-			}
+			vkEndCommandBuffer(fd->CommandBuffer);
+			vkQueueSubmit(queue, 1, &info, NULL);
 		}
 	}
 }
