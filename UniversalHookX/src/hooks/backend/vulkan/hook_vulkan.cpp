@@ -30,8 +30,13 @@ static VkDescriptorPool         g_DescriptorPool = VK_NULL_HANDLE;
 static uint32_t                 g_MinImageCount = 2;
 static VkRenderPass				g_RenderPass = VK_NULL_HANDLE;
 static ImGui_ImplVulkanH_Frame  g_Frames[8] = {};
+static HWND						g_hwnd = NULL;
+static bool						g_bRebuildBuffers = true;
 
-static bool SetupVulkan( ) {
+static void CleanupDeviceVK( );
+static void RenderImGui_VK(VkQueue queue, const VkPresentInfoKHR* pPresentInfo);
+
+static bool CreateDeviceVK( ) {
 	// Create Vulkan Instance
 	{
 		VkInstanceCreateInfo create_info = {};
@@ -142,7 +147,9 @@ static bool SetupVulkan( ) {
 	return true;
 }
 
-static bool CreateImGuiRender(VkDevice device, VkSwapchainKHR swapchain) {
+static bool CreateRenderTarget(VkDevice device, VkSwapchainKHR swapchain) {
+	g_bRebuildBuffers = false;
+
 	uint32_t uImageCount;
 	vkGetSwapchainImagesKHR(device, swapchain, &uImageCount, NULL);
 
@@ -183,7 +190,7 @@ static bool CreateImGuiRender(VkDevice device, VkSwapchainKHR swapchain) {
 		attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		attachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 		VkAttachmentReference color_attachment = {};
@@ -256,22 +263,102 @@ static VkResult VKAPI_CALL hkAcquireNextImageKHR(VkDevice device,
 												 VkSemaphore semaphore,
 												 VkFence fence,
 												 uint32_t* pImageIndex) {
-	static bool _ = CreateImGuiRender(device, swapchain);
-
 	g_Device = device;
-
 	return oAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, pImageIndex);
 }
 
 static std::add_pointer_t<VkResult VKAPI_CALL(VkQueue, const VkPresentInfoKHR*)> oQueuePresentKHR;
 static VkResult VKAPI_CALL hkQueuePresentKHR(VkQueue queue,
 											 const VkPresentInfoKHR* pPresentInfo) {
-	if (g_Device && H::bShowDemoWindow && !H::bShuttingDown) {
+	RenderImGui_VK(queue, pPresentInfo);
+	return oQueuePresentKHR(queue, pPresentInfo);
+}
+
+static std::add_pointer_t<VkResult VKAPI_CALL(VkDevice, const VkSwapchainCreateInfoKHR*, const VkAllocationCallbacks*, VkSwapchainKHR*)> oCreateSwapchainKHR;
+static VkResult VKAPI_CALL hkCreateSwapchainKHR(VkDevice device,
+												const VkSwapchainCreateInfoKHR* pCreateInfo,
+												const VkAllocationCallbacks* pAllocator,
+												VkSwapchainKHR* pSwapchain) {
+	g_bRebuildBuffers = true;
+	return oCreateSwapchainKHR(device, pCreateInfo, pAllocator, pSwapchain);;
+}
+
+namespace VK {
+	void Hook(HWND hwnd) {
+		if (!CreateDeviceVK( )) {
+			LOG("[!] CreateDeviceVK() failed.\n");
+			return;
+		}
+
+		void* fnAcquireNextImageKHR = reinterpret_cast<void*>(vkGetDeviceProcAddr(g_Device, "vkAcquireNextImageKHR"));
+		void* fnQueuePresentKHR = reinterpret_cast<void*>(vkGetDeviceProcAddr(g_Device, "vkQueuePresentKHR"));
+		void* fnCreateSwapchainKHR = reinterpret_cast<void*>(vkGetDeviceProcAddr(g_Device, "vkCreateSwapchainKHR"));
+
+		g_Device = NULL;
+
+		if (fnAcquireNextImageKHR) {
+			g_hwnd = hwnd;
+
+			// Hook
+			LOG("[+] Vulkan: fnAcquireNextImageKHR: 0x%p\n", fnAcquireNextImageKHR);
+			LOG("[+] Vulkan: fnQueuePresentKHR: 0x%p\n", fnQueuePresentKHR);
+			LOG("[+] Vulkan: fnCreateSwapchainKHR: 0x%p\n", fnCreateSwapchainKHR);
+
+			static MH_STATUS aniStatus = MH_CreateHook(reinterpret_cast<void**>(fnAcquireNextImageKHR), &hkAcquireNextImageKHR, reinterpret_cast<void**>(&oAcquireNextImageKHR));
+			static MH_STATUS qpStatus = MH_CreateHook(reinterpret_cast<void**>(fnQueuePresentKHR), &hkQueuePresentKHR, reinterpret_cast<void**>(&oQueuePresentKHR));
+			static MH_STATUS csStatus = MH_CreateHook(reinterpret_cast<void**>(fnCreateSwapchainKHR), &hkCreateSwapchainKHR, reinterpret_cast<void**>(&oCreateSwapchainKHR));
+
+			MH_EnableHook(fnAcquireNextImageKHR);
+			MH_EnableHook(fnQueuePresentKHR);
+			MH_EnableHook(fnCreateSwapchainKHR);
+		}
+	}
+
+	void Unhook( ) {
+		if (ImGui::GetCurrentContext( )) {
+			if (ImGui::GetIO( ).BackendRendererUserData)
+				ImGui_ImplVulkan_Shutdown( );
+
+			ImGui_ImplWin32_Shutdown( );
+			ImGui::DestroyContext( );
+		}
+
+		CleanupDeviceVK( );
+	}
+}
+
+static void CleanupDeviceVK( ) {
+	for (uint32_t i = 0; i < RTL_NUMBER_OF(g_Frames); ++i) {
+		if (g_Frames[i].CommandBuffer) { vkFreeCommandBuffers(g_Device, g_Frames[i].CommandPool, 1, &g_Frames[i].CommandBuffer); g_Frames[i].CommandBuffer = VK_NULL_HANDLE; };
+		if (g_Frames[i].CommandPool) { vkDestroyCommandPool(g_Device, g_Frames[i].CommandPool, g_Allocator); g_Frames[i].CommandPool = VK_NULL_HANDLE; };
+		if (g_Frames[i].BackbufferView) { vkDestroyImageView(g_Device, g_Frames[i].BackbufferView, g_Allocator); g_Frames[i].BackbufferView = VK_NULL_HANDLE; };
+		if (g_Frames[i].Framebuffer) { vkDestroyFramebuffer(g_Device, g_Frames[i].Framebuffer, g_Allocator); g_Frames[i].Framebuffer = VK_NULL_HANDLE; };
+	}
+
+	g_bRebuildBuffers = true;
+}
+
+static void RenderImGui_VK(VkQueue queue, const VkPresentInfoKHR* pPresentInfo) {
+	if (g_Device && !H::bShuttingDown) {
+		if (!ImGui::GetCurrentContext( )) {
+			ImGui::CreateContext( );
+			ImGui_ImplWin32_Init(g_hwnd);
+
+			ImGuiIO& io = ImGui::GetIO( );
+
+			io.IniFilename = nullptr;
+			io.LogFilename = nullptr;
+		}
+
 		for (uint32_t i = 0; i < pPresentInfo->swapchainCount; ++i) {
 			VkSwapchainKHR swapchain = pPresentInfo->pSwapchains[i];
-			ImGui_ImplVulkanH_Frame* fd = &g_Frames[pPresentInfo->pImageIndices[i]];	
+			if (g_bRebuildBuffers) {
+				CleanupDeviceVK( );
+				CreateRenderTarget(g_Device, swapchain);
+			}
+
+			ImGui_ImplVulkanH_Frame* fd = &g_Frames[pPresentInfo->pImageIndices[i]];
 			{
-				vkResetCommandPool(g_Device, fd->CommandPool, 0);
 				vkResetCommandBuffer(fd->CommandBuffer, 0);
 
 				VkCommandBufferBeginInfo info = {};
@@ -327,6 +414,7 @@ static VkResult VKAPI_CALL hkQueuePresentKHR(VkQueue queue,
 			// Submit command buffer
 			vkCmdEndRenderPass(fd->CommandBuffer);
 			{
+				VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 				VkSubmitInfo info = {};
 				info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 				info.commandBufferCount = 1;
@@ -337,75 +425,8 @@ static VkResult VKAPI_CALL hkQueuePresentKHR(VkQueue queue,
 			}
 		}
 	}
-
-	return oQueuePresentKHR(queue, pPresentInfo);
 }
 
-static std::add_pointer_t<VkResult VKAPI_CALL(VkDevice, const VkSwapchainCreateInfoKHR*, const VkAllocationCallbacks*, VkSwapchainKHR*)> oCreateSwapchainKHR;
-static VkResult VKAPI_CALL hkCreateSwapchainKHR(VkDevice device,
-												const VkSwapchainCreateInfoKHR* pCreateInfo,
-												const VkAllocationCallbacks* pAllocator,
-												VkSwapchainKHR* pSwapchain) {
-	VkResult err = oCreateSwapchainKHR(device, pCreateInfo, pAllocator, pSwapchain);
-
-	CreateImGuiRender(device, *pSwapchain);
-
-	return err;
-}
-
-namespace VK {
-	void Hook(HWND hwnd) {
-		HMODULE vulkan1 = GetModuleHandleA("vulkan-1.dll");
-		if (vulkan1) {
-			LOG("[+] Vulkan: ImageBase: 0x%p\n", vulkan1);
-			
-			if (!SetupVulkan( )) {
-				LOG("[!] SetupVulkan() failed.\n");
-				return;
-			}
-
-			void* fnAcquireNextImageKHR = reinterpret_cast<void*>(vkGetDeviceProcAddr(g_Device, "vkAcquireNextImageKHR"));
-			void* fnQueuePresentKHR = reinterpret_cast<void*>(vkGetDeviceProcAddr(g_Device, "vkQueuePresentKHR"));
-			void* fnCreateSwapchainKHR = reinterpret_cast<void*>(vkGetDeviceProcAddr(g_Device, "vkCreateSwapchainKHR"));
-
-			g_Device = NULL;
-
-			if (fnAcquireNextImageKHR) {
-				// Init ImGui
-				ImGui::CreateContext( );
-				ImGui_ImplWin32_Init(hwnd);
-
-				ImGuiIO& io = ImGui::GetIO( );
-
-				io.IniFilename = nullptr;
-				io.LogFilename = nullptr;
-
-				// Hook
-				LOG("[+] Vulkan: fnAcquireNextImageKHR: 0x%p\n", fnAcquireNextImageKHR);
-				LOG("[+] Vulkan: fnQueuePresentKHR: 0x%p\n", fnQueuePresentKHR);
-				LOG("[+] Vulkan: fnCreateSwapchainKHR: 0x%p\n", fnCreateSwapchainKHR);
-
-				static MH_STATUS aniStatus = MH_CreateHook(reinterpret_cast<void**>(fnAcquireNextImageKHR), &hkAcquireNextImageKHR, reinterpret_cast<void**>(&oAcquireNextImageKHR));
-				static MH_STATUS qpStatus = MH_CreateHook(reinterpret_cast<void**>(fnQueuePresentKHR), &hkQueuePresentKHR, reinterpret_cast<void**>(&oQueuePresentKHR));
-				static MH_STATUS csStatus = MH_CreateHook(reinterpret_cast<void**>(fnCreateSwapchainKHR), &hkCreateSwapchainKHR, reinterpret_cast<void**>(&oCreateSwapchainKHR));
-
-				MH_EnableHook(fnAcquireNextImageKHR);
-				MH_EnableHook(fnQueuePresentKHR);
-				MH_EnableHook(fnCreateSwapchainKHR);
-			}
-		}
-	}
-
-	void Unhook( ) {
-		if (ImGui::GetCurrentContext( )) {
-			if (ImGui::GetIO( ).BackendRendererUserData)
-				ImGui_ImplVulkan_Shutdown( );
-
-			ImGui_ImplWin32_Shutdown( );
-			ImGui::DestroyContext( );
-		}
-	}
-}
 #else
 #include <Windows.h>
 namespace VK {
