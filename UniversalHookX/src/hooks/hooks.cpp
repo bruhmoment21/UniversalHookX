@@ -102,6 +102,7 @@ namespace Hooks {
 
 	void Free( ) {
 		MH_DisableHook(MH_ALL_HOOKS);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 		RenderingBackend_t eRenderingBackend = U::GetRenderingBackend( );
 		switch (eRenderingBackend) {
