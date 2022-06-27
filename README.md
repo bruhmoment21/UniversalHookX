@@ -22,7 +22,7 @@ We create a 'dummy device' and a 'dummy swapchain' (for DirectX10 and higher) wi
 ## OpenGL
 We hook wglSwapBuffers which is an exported function in opengl32.dll. [See code used in OpenGL backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/opengl/hook_opengl.cpp#L55-L60)
 ## Vulkan
-We create a 'dummy device' to get the required functions addresses. The point is to hook into [vkQueuePresentKHR](https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkQueuePresentKHR.html) where we will submit the queue with our data from our command pool and our command buffer. [See code used in Vulkan backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/vulkan/hook_vulkan.cpp#L300-L311)
+We create a 'dummy device' to get the required functions addresses. The point is to hook into [vkQueuePresentKHR](https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkQueuePresentKHR.html) where we will submit the queue with our data from our command pool and our command buffer. [See code used in Vulkan backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/vulkan/hook_vulkan.cpp#L301-L312)
 
 # Media
 ## DirectX9 32bit
