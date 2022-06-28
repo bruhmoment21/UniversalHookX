@@ -31,6 +31,7 @@ static uint32_t                 g_MinImageCount = 2;
 static VkRenderPass				g_RenderPass = VK_NULL_HANDLE;
 static ImGui_ImplVulkanH_Frame  g_Frames[8] = {};
 static HWND						g_Hwnd = NULL;
+static VkExtent2D				g_ImageExtent = {};
 
 static void CleanupDeviceVulkan( );
 static void CleanupRenderTarget( );
@@ -213,8 +214,6 @@ static bool CreateRenderTarget(VkDevice device, VkSwapchainKHR swapchain) {
 		info.renderPass = g_RenderPass;
 		info.attachmentCount = 1;
 		info.pAttachments = attachment;
-		info.width = 3840;
-		info.height = 2160;
 		info.layers = 1;
 
 		for (uint32_t i = 0; i < uImageCount; ++i) {
@@ -263,6 +262,7 @@ static VkResult VKAPI_CALL hkAcquireNextImageKHR(VkDevice device,
 												 VkFence fence,
 												 uint32_t* pImageIndex) {
 	g_Device = device;
+
 	return oAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, pImageIndex);;
 }
 
@@ -270,6 +270,7 @@ static std::add_pointer_t<VkResult VKAPI_CALL(VkQueue, const VkPresentInfoKHR*)>
 static VkResult VKAPI_CALL hkQueuePresentKHR(VkQueue queue,
 											 const VkPresentInfoKHR* pPresentInfo) {
 	RenderImGui_Vulkan(queue, pPresentInfo);
+
 	return oQueuePresentKHR(queue, pPresentInfo);
 }
 
@@ -279,6 +280,8 @@ static VkResult VKAPI_CALL hkCreateSwapchainKHR(VkDevice device,
 												const VkAllocationCallbacks* pAllocator,
 												VkSwapchainKHR* pSwapchain) {
 	CleanupRenderTarget( );
+	g_ImageExtent = pCreateInfo->imageExtent;
+
 	return oCreateSwapchainKHR(device, pCreateInfo, pAllocator, pSwapchain);;
 }
 
@@ -340,6 +343,9 @@ static void CleanupDeviceVulkan( ) {
 
 	if (g_DescriptorPool) { vkDestroyDescriptorPool(g_Device, g_DescriptorPool, g_Allocator); g_DescriptorPool = NULL; }
 	if (g_Instance) { vkDestroyInstance(g_Instance, g_Allocator); g_Instance = NULL; }
+
+	g_ImageExtent = {};
+	g_Device = NULL;
 }
 
 static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentInfo) {
@@ -377,8 +383,13 @@ static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentIn
 			info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 			info.renderPass = g_RenderPass;
 			info.framebuffer = fd->Framebuffer;
-			info.renderArea.extent.width = 3840;
-			info.renderArea.extent.height = 2160;
+			if (g_ImageExtent.width == 0 || g_ImageExtent.height == 0) {
+				// We don't know the window size the first time. So we just set it to 4K.
+				info.renderArea.extent.width = 3840;
+				info.renderArea.extent.height = 2160;
+			} else {
+				info.renderArea.extent = g_ImageExtent;
+			}
 
 			vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
 		}
