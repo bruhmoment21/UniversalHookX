@@ -22,7 +22,7 @@ We create a 'dummy device' and a 'dummy swapchain' (for DirectX10 and higher) wi
 ## OpenGL
 We hook wglSwapBuffers which is an exported function in opengl32.dll. [See code used in OpenGL backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/opengl/hook_opengl.cpp#L55-L60)
 ## Vulkan
-We create a 'dummy device' to get the required functions addresses. The point is to hook into [vkQueuePresentKHR](https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkQueuePresentKHR.html) where we will submit the queue with our data from our command pool and our command buffer. [See code used in Vulkan backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/vulkan/hook_vulkan.cpp#L301-L312)
+We create a 'dummy device' to get the required functions addresses. The point is to hook into [vkQueuePresentKHR](https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkQueuePresentKHR.html) where we will submit the queue with our data from our command pool and our command buffer. [See code used in Vulkan backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/vulkan/hook_vulkan.cpp#L304-L315)
 
 # Media
 ## DirectX9 32bit
@@ -37,8 +37,9 @@ We create a 'dummy device' to get the required functions addresses. The point is
 ## OpenGL 32bit + 64bit
 ![image](https://user-images.githubusercontent.com/53657322/174028360-a59d71e8-de1a-4e79-8df4-8dd40b10775e.png)
 ![image](https://user-images.githubusercontent.com/53657322/174029463-a7e24813-850b-4261-86b7-4c26fb18a34b.png)
-## Vulkan
+## Vulkan 32bit + 64bit
 ![image](https://user-images.githubusercontent.com/53657322/175804247-681dd228-5d18-462a-82e4-bd9eab90bdcb.png)
+![image](https://user-images.githubusercontent.com/53657322/176169557-d278097a-2e1e-40a1-ac07-2d87865ab363.png)
 
 # Other
 Feel free to open an issue if something isn't working. **Resizing** works because [ResizeBuffers](https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-resizebuffers) is hooked. Input handling is up to you to decide how to make/use it. The WndProc hook is [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L41). It should support both 64bit and 32bit architectures.
