@@ -190,6 +190,10 @@ namespace DX10 {
                 return;
             }
 
+            pIDXGIFactory->Release( );
+            pDXGIAdapter->Release( );
+            pDXGIDevice->Release( );
+
             void** pVTable = *reinterpret_cast<void***>(g_pSwapChain);
             void** pFactoryVTable = *reinterpret_cast<void***>(pIDXGIFactory);
 
