@@ -41,11 +41,11 @@ static bool CreateDeviceVK( ) {
 	// Create Vulkan Instance
 	{
 		VkInstanceCreateInfo create_info = {};
-		constexpr const char* extensions[ ] = { "VK_KHR_surface", "VK_KHR_win32_surface" };
+		constexpr const char* enabled_extension = "VK_KHR_surface";
 		
 		create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-		create_info.enabledExtensionCount = RTL_NUMBER_OF(extensions);
-		create_info.ppEnabledExtensionNames = extensions;
+		create_info.enabledExtensionCount = 1;
+		create_info.ppEnabledExtensionNames = &enabled_extension;
 
 		// Create Vulkan Instance without any debug feature
 		vkCreateInstance(&create_info, g_Allocator, &g_Instance);
@@ -99,20 +99,21 @@ static bool CreateDeviceVK( ) {
 
 	// Create Logical Device (with 1 queue)
 	{
-		int device_extension_count = 1;
-		const char* device_extensions[ ] = { "VK_KHR_swapchain" };
-		const float queue_priority[ ] = { 1.0f };
-		VkDeviceQueueCreateInfo queue_info[1] = {};
-		queue_info[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		queue_info[0].queueFamilyIndex = g_QueueFamily;
-		queue_info[0].queueCount = 1;
-		queue_info[0].pQueuePriorities = queue_priority;
+		constexpr const char* device_extension = "VK_KHR_swapchain";
+		constexpr const float queue_priority = 1.0f;
+
+		VkDeviceQueueCreateInfo queue_info = {};
+		queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queue_info.queueFamilyIndex = g_QueueFamily;
+		queue_info.queueCount = 1;
+		queue_info.pQueuePriorities = &queue_priority;
+
 		VkDeviceCreateInfo create_info = {};
 		create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		create_info.queueCreateInfoCount = sizeof(queue_info) / sizeof(queue_info[0]);
-		create_info.pQueueCreateInfos = queue_info;
-		create_info.enabledExtensionCount = device_extension_count;
-		create_info.ppEnabledExtensionNames = device_extensions;
+		create_info.queueCreateInfoCount = 1;
+		create_info.pQueueCreateInfos = &queue_info;
+		create_info.enabledExtensionCount = 1;
+		create_info.ppEnabledExtensionNames = &device_extension;
 		
 		vkCreateDevice(g_PhysicalDevice, &create_info, g_Allocator, &g_FakeDevice);
 
