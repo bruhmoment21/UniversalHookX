@@ -263,7 +263,7 @@ static VkResult VKAPI_CALL hkAcquireNextImageKHR(VkDevice device,
 												 uint32_t* pImageIndex) {
 	g_Device = device;
 
-	return oAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, pImageIndex);;
+	return oAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, pImageIndex);
 }
 
 static std::add_pointer_t<VkResult VKAPI_CALL(VkQueue, const VkPresentInfoKHR*)> oQueuePresentKHR;
@@ -282,7 +282,7 @@ static VkResult VKAPI_CALL hkCreateSwapchainKHR(VkDevice device,
 	CleanupRenderTarget( );
 	g_ImageExtent = pCreateInfo->imageExtent;
 
-	return oCreateSwapchainKHR(device, pCreateInfo, pAllocator, pSwapchain);;
+	return oCreateSwapchainKHR(device, pCreateInfo, pAllocator, pSwapchain);
 }
 
 namespace VK {
