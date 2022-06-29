@@ -41,11 +41,11 @@ static bool CreateDeviceVK( ) {
 	// Create Vulkan Instance
 	{
 		VkInstanceCreateInfo create_info = {};
-		constexpr const char* extensions[ ] = { "VK_KHR_surface", "VK_KHR_win32_surface" };
+		constexpr const char* enabled_extension = "VK_KHR_surface";
 		
 		create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-		create_info.enabledExtensionCount = RTL_NUMBER_OF(extensions);
-		create_info.ppEnabledExtensionNames = extensions;
+		create_info.enabledExtensionCount = 1;
+		create_info.ppEnabledExtensionNames = &enabled_extension;
 
 		// Create Vulkan Instance without any debug feature
 		vkCreateInstance(&create_info, g_Allocator, &g_Instance);
