@@ -49,7 +49,7 @@ static bool CreateDeviceD3D10(HWND hWnd) {
 }
 
 static void CreateRenderTarget(IDXGISwapChain* pSwapChain) {
-    ID3D10Texture2D* pBackBuffer;
+    ID3D10Texture2D* pBackBuffer = NULL;
     pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
     if (pBackBuffer) {
         DXGI_SWAP_CHAIN_DESC sd;
@@ -176,13 +176,13 @@ namespace DX10 {
             io.LogFilename = nullptr;
 
             // Hook
-            IDXGIDevice* pDXGIDevice = nullptr;
+            IDXGIDevice* pDXGIDevice = NULL;
             g_pd3dDevice->QueryInterface(IID_PPV_ARGS(&pDXGIDevice));
 
-            IDXGIAdapter* pDXGIAdapter = nullptr;
+            IDXGIAdapter* pDXGIAdapter = NULL;
             pDXGIDevice->GetAdapter(&pDXGIAdapter);
 
-            IDXGIFactory* pIDXGIFactory = nullptr;
+            IDXGIFactory* pIDXGIFactory = NULL;
             pDXGIAdapter->GetParent(IID_PPV_ARGS(&pIDXGIFactory));
 
             if (!pIDXGIFactory) {

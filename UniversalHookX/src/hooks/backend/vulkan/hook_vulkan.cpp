@@ -41,11 +41,11 @@ static bool CreateDeviceVK( ) {
 	// Create Vulkan Instance
 	{
 		VkInstanceCreateInfo create_info = {};
-		constexpr const char* enabled_extension = "VK_KHR_surface";
+		constexpr const char* instance_extension = "VK_KHR_surface";
 		
 		create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		create_info.enabledExtensionCount = 1;
-		create_info.ppEnabledExtensionNames = &enabled_extension;
+		create_info.ppEnabledExtensionNames = &instance_extension;
 
 		// Create Vulkan Instance without any debug feature
 		vkCreateInstance(&create_info, g_Allocator, &g_Instance);
@@ -123,7 +123,7 @@ static bool CreateDeviceVK( ) {
 	return true;
 }
 
-static bool CreateRenderTarget(VkDevice device, VkSwapchainKHR swapchain) {
+static void CreateRenderTarget(VkDevice device, VkSwapchainKHR swapchain) {
 	uint32_t uImageCount;
 	vkGetSwapchainImagesKHR(device, swapchain, &uImageCount, NULL);
 
@@ -132,9 +132,7 @@ static bool CreateRenderTarget(VkDevice device, VkSwapchainKHR swapchain) {
 
 	for (uint32_t i = 0; i < uImageCount; ++i) {
 		g_Frames[i].Backbuffer = backbuffers[i];
-	}
 
-	for (uint32_t i = 0; i < uImageCount; ++i) {
 		ImGui_ImplVulkanH_Frame* fd = &g_Frames[i];
 		{
 			VkCommandPoolCreateInfo info = {};
@@ -251,8 +249,6 @@ static bool CreateRenderTarget(VkDevice device, VkSwapchainKHR swapchain) {
 
 		vkCreateDescriptorPool(device, &pool_info, g_Allocator, &g_DescriptorPool);
 	}
-
-	return true;
 }
 
 static std::add_pointer_t<VkResult VKAPI_CALL(VkDevice, VkSwapchainKHR, uint64_t, VkSemaphore, VkFence, uint32_t*)> oAcquireNextImageKHR;
