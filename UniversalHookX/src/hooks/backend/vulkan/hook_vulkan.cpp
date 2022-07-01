@@ -6,7 +6,6 @@
 
 #include <unordered_map>
 #include <memory>
-#include <mutex>
 
 // https://vulkan.lunarg.com/
 #include <vulkan/vulkan.h>
