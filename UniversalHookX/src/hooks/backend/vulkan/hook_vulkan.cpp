@@ -19,7 +19,7 @@
 
 #include "../../hooks.hpp"
 
-static VkAllocationCallbacks*	g_Allocator = NULL;
+static VkAllocationCallbacks* 	g_Allocator = NULL;
 static VkInstance               g_Instance = VK_NULL_HANDLE;
 static VkPhysicalDevice         g_PhysicalDevice = VK_NULL_HANDLE;
 static VkDevice                 g_FakeDevice = VK_NULL_HANDLE, g_Device = VK_NULL_HANDLE;
@@ -41,7 +41,7 @@ static bool CreateDeviceVK( ) {
 	{
 		VkInstanceCreateInfo create_info = {};
 		constexpr const char* instance_extension = "VK_KHR_surface";
-		
+
 		create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		create_info.enabledExtensionCount = 1;
 		create_info.ppEnabledExtensionNames = &instance_extension;
@@ -113,7 +113,7 @@ static bool CreateDeviceVK( ) {
 		create_info.pQueueCreateInfos = &queue_info;
 		create_info.enabledExtensionCount = 1;
 		create_info.ppEnabledExtensionNames = &device_extension;
-		
+
 		vkCreateDevice(g_PhysicalDevice, &create_info, g_Allocator, &g_FakeDevice);
 
 		LOG("[+] Vulkan: g_FakeDevice: 0x%p\n", g_FakeDevice);
@@ -407,7 +407,6 @@ static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentIn
 			ImGui_ImplVulkan_Init(&init_info, g_RenderPass);
 
 			ImGui_ImplVulkan_CreateFontsTexture(fd->CommandBuffer);
-			ImGui_ImplVulkan_DestroyFontUploadObjects( );
 		}
 
 		ImGui_ImplVulkan_NewFrame( );
