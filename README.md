@@ -3,7 +3,7 @@ Universal graphical hook for Windows apps, although it should work on [Linux](ht
 
 ## Usage
 Call `Utils::SetRenderingBackend(eRenderingBackend)` in DllMain as shown [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/dllmain.cpp#L18).
-You must do this or the DLL won't know what to hook or how to hook. [What is eRenderingBackend?](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/utils/utils.hpp#L3).
+You must do this or the DLL won't know what to hook or how to hook. [What is eRenderingBackend?](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/utils/utils.hpp#L3). To enable or disable a specific backend comment backends in [backend.hpp](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/backend.hpp)
 
 ## Purpose
 The purpose of this library is to show how to hook different backends to display ImGui, the code should be easy to understand as I tried to make everything seem almost the same, see [backends folder](https://github.com/bruhmoment21/UniversalHookX/tree/main/UniversalHookX/src/hooks/backend).
@@ -46,7 +46,7 @@ Feel free to open an issue if something isn't working. **Resizing** works becaus
 
 ## Known issues
 Try pressing [HOME](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L45-L48) to rehook and see if things get better.  
-[Minecraft (tested on 1.19) - menu textures glitched](https://user-images.githubusercontent.com/53657322/174030423-aa92e780-057e-451d-9d60-ddd20f668d03.png)
+[Minecraft (tested on 1.19) - ui textures glitched sometimes](https://user-images.githubusercontent.com/53657322/174030423-aa92e780-057e-451d-9d60-ddd20f668d03.png)
 
 ## Dependencies
 [MinHook](https://github.com/TsudaKageyu/minhook) - TsudaKageyu - Used for hooking (trampoline method).  
