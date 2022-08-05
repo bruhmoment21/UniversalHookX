@@ -25,7 +25,7 @@ static DWORD WINAPI ReinitializeGraphicalHooks(LPVOID lpParam) {
 	while (hNewWindow == reinterpret_cast<HWND>(lpParam)) {
 		hNewWindow = U::GetProcessWindow( );
 	}
-	
+
 	H::bShuttingDown = true;
 
 	H::Free( );
@@ -58,7 +58,7 @@ static LRESULT WINAPI WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 	}
 
 	LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	if (H::bShowDemoWindow && !H::bShuttingDown) {
+	if (H::bShowDemoWindow) {
 		ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
 
 		// (Doesn't work for some games like 'Sid Meier's Civilization VI')
@@ -101,6 +101,10 @@ namespace Hooks {
 	}
 
 	void Free( ) {
+		if (oWndProc) {
+			SetWindowLongPtr(g_hWindow, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(oWndProc));
+		}
+
 		MH_DisableHook(MH_ALL_HOOKS);
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -112,10 +116,6 @@ namespace Hooks {
 			case DIRECTX12: DX12::Unhook( ); break;
 			case OPENGL:	GL::Unhook( ); break;
 			case VULKAN:	VK::Unhook( ); break;
-		}
-
-		if (oWndProc) {
-			SetWindowLongPtr(g_hWindow, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(oWndProc));
 		}
 	}
 }

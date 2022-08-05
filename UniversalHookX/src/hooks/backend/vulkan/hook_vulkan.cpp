@@ -425,7 +425,6 @@ static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentIn
 		// Submit command buffer
 		vkCmdEndRenderPass(fd->CommandBuffer);
 		{
-			VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 			VkSubmitInfo info = {};
 			info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 			info.commandBufferCount = 1;
