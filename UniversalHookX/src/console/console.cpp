@@ -4,24 +4,30 @@
 
 #include "console.hpp"
 
+#include "../hooks/hooks.hpp"
+
 void Console::Alloc( ) {
 #ifndef DISABLE_LOGGING_CONSOLE
-    AllocConsole( );
-    
-    SetConsoleTitleA("UniversalHookX - Debug Console");
+	AllocConsole( );
 
-    freopen_s(reinterpret_cast<FILE**>(stdin), "conin$", "r", stdin);
-    freopen_s(reinterpret_cast<FILE**>(stdout), "conout$", "w", stdout);
+	SetConsoleTitleA("UniversalHookX - Debug Console");
 
-    ::ShowWindow(GetConsoleWindow( ), SW_SHOW);
+	freopen_s(reinterpret_cast<FILE**>(stdin), "conin$", "r", stdin);
+	freopen_s(reinterpret_cast<FILE**>(stdout), "conout$", "w", stdout);
+
+	::ShowWindow(GetConsoleWindow( ), SW_SHOW);
 #endif
 }
 
 void Console::Free( ) {
 #ifndef DISABLE_LOGGING_CONSOLE
-    fclose(stdin);
-    fclose(stdout);
+	fclose(stdin);
+	fclose(stdout);
 
-    ::ShowWindow(GetConsoleWindow( ), SW_HIDE);
+	if (H::bShuttingDown) {
+		::ShowWindow(GetConsoleWindow( ), SW_HIDE);
+	} else {
+		FreeConsole( );
+	}
 #endif
 }
