@@ -45,7 +45,7 @@ We create a 'dummy device' to get the required functions addresses. The point is
 Feel free to open an issue if something isn't working. **Resizing** works because [ResizeBuffers](https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-resizebuffers) is hooked. Input handling is up to you to decide how to make/use it. The WndProc hook is [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L41). It should support both 64bit and 32bit architectures.
 
 ## Known issues
-Try pressing [HOME](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L45-L48) to rehook and see if things get better.    
+Try pressing [HOME](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L46-L49) to rehook and see if things get better.    
 [Minecraft (tested on 1.19) - ui textures glitched sometimes.](https://user-images.githubusercontent.com/53657322/174030423-aa92e780-057e-451d-9d60-ddd20f668d03.png)  
 Does **NOT** support Vulkan apps that use [Async Compute.](https://stackoverflow.com/questions/65076869/vulkan-queue-families-clarification)
 
