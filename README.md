@@ -47,7 +47,7 @@ Feel free to open an issue if something isn't working. **Resizing** works becaus
 ## Known issues
 Try pressing [HOME](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L46-L49) to rehook and see if things get better.    
 [Minecraft (tested on 1.19) - ui textures glitched sometimes.](https://user-images.githubusercontent.com/53657322/174030423-aa92e780-057e-451d-9d60-ddd20f668d03.png)  
-Does **NOT** support Vulkan apps that use [Async Compute.](https://stackoverflow.com/questions/65076869/vulkan-queue-families-clarification)
+Does **NOT support every** Vulkan app that uses [Async Compute.](https://stackoverflow.com/questions/65076869/vulkan-queue-families-clarification) (Example: [Doom Eternal](https://github.com/bruhmoment21/UniversalHookX/issues/3#issuecomment-1191235540))
 
 ## Dependencies
 [MinHook](https://github.com/TsudaKageyu/minhook) - TsudaKageyu - Used for hooking (trampoline method).  
