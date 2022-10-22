@@ -1,5 +1,5 @@
 # UniversalHookX ![C++](https://img.shields.io/badge/language-C%2B%2B-%23f34b7d.svg) ![Windows](https://img.shields.io/badge/platform-Windows-0078d7.svg)
-Universal graphical hook for Windows apps, although it should work on [Linux](https://user-images.githubusercontent.com/53657322/176435063-c1511ee4-462c-47f2-9f3a-1cc983c73310.png) too if you implement it correctly, that will display an [ImGui Demo Window](https://github.com/bruhmoment21/UniversalHookX/blob/8bb97657c53a802d7db20feec65cd43ed8bfe0c8/UniversalHookX/src/dependencies/imgui/imgui_demo.cpp#L266) as an example.
+Universal graphical hook for Windows apps, although it should work on [Linux](https://user-images.githubusercontent.com/53657322/176435063-c1511ee4-462c-47f2-9f3a-1cc983c73310.png) too if you implement it correctly, that will display an [ImGui Demo Window](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/menu/menu.cpp#L24) as an example.
 
 ## Usage
 Call `Utils::SetRenderingBackend(eRenderingBackend)` in DllMain as shown [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/dllmain.cpp#L18).
@@ -18,11 +18,11 @@ The purpose of this library is to show how to hook different backends to display
 
 # How it works
 ## DirectX
-We create a 'dummy device' and a 'dummy swapchain' (for DirectX10 and higher) with a handle to the [console window](https://docs.microsoft.com/en-us/windows/console/getconsolewindow). See the `CreateDeviceD3DX` function in every DirectX backend. [See DX12 example 'CreateDeviceD3D12'](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L41-L70). The point is to get a pointer to the vTable to get the required functions addresses. We release it right after getting the pointers because we won't use our 'dummy device' and 'dummy swapchain' for drawing. [See code used in DX12 backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L214-L259)
+We create a 'dummy device' and a 'dummy swapchain' (for DirectX10 and higher) with a handle to the [console window](https://docs.microsoft.com/en-us/windows/console/getconsolewindow). See the `CreateDeviceD3DX` function in every DirectX backend. [See DX12 example 'CreateDeviceD3D12'](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L43-L72). The point is to get a pointer to the vTable to get the required functions addresses. We release it right after getting the pointers because we won't use our 'dummy device' and 'dummy swapchain' for drawing. [See code used in DX12 backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/dx12/hook_directx12.cpp#L195-L259)
 ## OpenGL
-We hook wglSwapBuffers which is an exported function in opengl32.dll. [See code used in OpenGL backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/opengl/hook_opengl.cpp#L55-L60)
+We hook wglSwapBuffers which is an exported function in opengl32.dll. [See code used in OpenGL backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/opengl/hook_opengl.cpp#L39-L56)
 ## Vulkan
-We create a 'dummy device' to get the required functions addresses. The point is to hook into [vkQueuePresentKHR](https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkQueuePresentKHR.html) where we will submit the queue with our data from our command pool and our command buffer. [See code used in Vulkan backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/vulkan/hook_vulkan.cpp#L300-L311)
+We create a 'dummy device' to get the required functions addresses. The point is to hook into [vkQueuePresentKHR](https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkQueuePresentKHR.html) where we will submit the queue with our data from our command pool and our command buffer. [See code used in Vulkan backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/vulkan/hook_vulkan.cpp#L286-L317)
 
 # Media
 ## DirectX9 32bit
@@ -42,12 +42,13 @@ We create a 'dummy device' to get the required functions addresses. The point is
 ![image](https://user-images.githubusercontent.com/53657322/176169557-d278097a-2e1e-40a1-ac07-2d87865ab363.png)
 
 # Other
-Feel free to open an issue if something isn't working. **Resizing** works because [ResizeBuffers](https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-resizebuffers) is hooked. Input handling is up to you to decide how to make/use it. The WndProc hook is [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L41). It should support both 64bit and 32bit architectures.
+Feel free to open an issue if something isn't working. **Resizing** works because [ResizeBuffers](https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-resizebuffers) is hooked. Input handling is up to you to decide how to make/use it. The WndProc hook is [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L42). It should support both 64bit and 32bit architectures.
 
 ## Known issues
 Try pressing [HOME](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L46-L49) to rehook and see if things get better.    
 [Minecraft (tested on 1.19) - ui textures glitched sometimes.](https://user-images.githubusercontent.com/53657322/174030423-aa92e780-057e-451d-9d60-ddd20f668d03.png)  
-Does **NOT support every** Vulkan app that uses [Async Compute.](https://stackoverflow.com/questions/65076869/vulkan-queue-families-clarification) (Example: [Doom Eternal](https://github.com/bruhmoment21/UniversalHookX/issues/3#issuecomment-1191235540))
+Does **NOT support every** Vulkan app that uses [Async Compute.](https://stackoverflow.com/questions/65076869/vulkan-queue-families-clarification) (Example: [Doom Eternal](https://github.com/bruhmoment21/UniversalHookX/issues/3#issuecomment-1191235540))  
+Portal 2 will crash if injected while Valve intro is playing.
 
 ## Dependencies
 [MinHook](https://github.com/TsudaKageyu/minhook) - TsudaKageyu - Used for hooking (trampoline method).  
