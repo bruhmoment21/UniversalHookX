@@ -1,7 +1,7 @@
 #include "../../../backend.hpp"
 #include "../../../console/console.hpp"
 
-#ifdef BACKEND_ENABLE_DX10
+#ifdef ENABLE_BACKEND_DX10
 #include <Windows.h>
 
 #include <d3d10.h>
@@ -21,9 +21,11 @@
 #include "../../../utils/utils.hpp"
 #include "../../hooks.hpp"
 
-static ID3D10Device*            g_pd3dDevice = NULL;
-static ID3D10RenderTargetView*  g_pd3dRenderTarget = NULL;
-static IDXGISwapChain*          g_pSwapChain = NULL;
+#include "../../../menu/menu.hpp"
+
+static ID3D10Device* g_pd3dDevice = NULL;
+static ID3D10RenderTargetView* g_pd3dRenderTarget = NULL;
+static IDXGISwapChain* g_pSwapChain = NULL;
 
 static void CleanupDeviceD3D10( );
 static void CleanupRenderTarget( );
@@ -31,7 +33,7 @@ static void RenderImGui_DX10(IDXGISwapChain* pSwapChain);
 
 static bool CreateDeviceD3D10(HWND hWnd) {
     // Create the D3DDevice
-    DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
+    DXGI_SWAP_CHAIN_DESC swapChainDesc = { };
     swapChainDesc.Windowed = TRUE;
     swapChainDesc.BufferCount = 2;
     swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -55,7 +57,7 @@ static void CreateRenderTarget(IDXGISwapChain* pSwapChain) {
         DXGI_SWAP_CHAIN_DESC sd;
         pSwapChain->GetDesc(&sd);
 
-        D3D10_RENDER_TARGET_VIEW_DESC desc = {};
+        D3D10_RENDER_TARGET_VIEW_DESC desc = { };
         desc.Format = static_cast<DXGI_FORMAT>(Utils::GetCorrectDXGIFormat(sd.BufferDesc.Format));
         desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2D;
 
@@ -85,11 +87,11 @@ static HRESULT WINAPI hkPresent1(IDXGISwapChain* pSwapChain,
 
 static std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain*, UINT, UINT, UINT, DXGI_FORMAT, UINT)> oResizeBuffers;
 static HRESULT WINAPI hkResizeBuffers(IDXGISwapChain* pSwapChain,
-                                      UINT        BufferCount,
-                                      UINT        Width,
-                                      UINT        Height,
+                                      UINT BufferCount,
+                                      UINT Width,
+                                      UINT Height,
                                       DXGI_FORMAT NewFormat,
-                                      UINT        SwapChainFlags) {
+                                      UINT SwapChainFlags) {
     CleanupRenderTarget( );
 
     return oResizeBuffers(pSwapChain, BufferCount, Width, Height, NewFormat, SwapChainFlags);
@@ -97,11 +99,11 @@ static HRESULT WINAPI hkResizeBuffers(IDXGISwapChain* pSwapChain,
 
 static std::add_pointer_t<HRESULT WINAPI(IDXGISwapChain*, UINT, UINT, UINT, DXGI_FORMAT, UINT, const UINT*, IUnknown* const*)> oResizeBuffers1;
 static HRESULT WINAPI hkResizeBuffers1(IDXGISwapChain* pSwapChain,
-                                       UINT        BufferCount,
-                                       UINT        Width,
-                                       UINT        Height,
+                                       UINT BufferCount,
+                                       UINT Width,
+                                       UINT Height,
                                        DXGI_FORMAT NewFormat,
-                                       UINT        SwapChainFlags,
+                                       UINT SwapChainFlags,
                                        const UINT* pCreationNodeMask,
                                        IUnknown* const* ppPresentQueue) {
     CleanupRenderTarget( );
@@ -166,14 +168,7 @@ namespace DX10 {
         LOG("[+] DirectX10: g_pSwapChain: 0x%p\n", g_pSwapChain);
 
         if (g_pd3dDevice) {
-            // Init ImGui
-            ImGui::CreateContext( );
-            ImGui_ImplWin32_Init(hwnd);
-
-            ImGuiIO& io = ImGui::GetIO( );
-
-            io.IniFilename = nullptr;
-            io.LogFilename = nullptr;
+            Menu::InitializeContext(hwnd);
 
             // Hook
             IDXGIDevice* pDXGIDevice = NULL;
@@ -239,23 +234,34 @@ namespace DX10 {
             if (ImGui::GetIO( ).BackendRendererUserData)
                 ImGui_ImplDX10_Shutdown( );
 
-            ImGui_ImplWin32_Shutdown( );
+            if (ImGui::GetIO( ).BackendPlatformUserData)
+                ImGui_ImplWin32_Shutdown( );
+
             ImGui::DestroyContext( );
         }
 
         CleanupDeviceD3D10( );
     }
-}
+} // namespace DX10
 
 static void CleanupRenderTarget( ) {
-    if (g_pd3dRenderTarget) { g_pd3dRenderTarget->Release( ); g_pd3dRenderTarget = NULL; }
+    if (g_pd3dRenderTarget) {
+        g_pd3dRenderTarget->Release( );
+        g_pd3dRenderTarget = NULL;
+    }
 }
 
 static void CleanupDeviceD3D10( ) {
     CleanupRenderTarget( );
 
-    if (g_pSwapChain) { g_pSwapChain->Release( ); g_pSwapChain = NULL; }
-    if (g_pd3dDevice) { g_pd3dDevice->Release( ); g_pd3dDevice = NULL; }
+    if (g_pSwapChain) {
+        g_pSwapChain->Release( );
+        g_pSwapChain = NULL;
+    }
+    if (g_pd3dDevice) {
+        g_pd3dDevice->Release( );
+        g_pd3dDevice = NULL;
+    }
 }
 
 static void RenderImGui_DX10(IDXGISwapChain* pSwapChain) {
@@ -275,9 +281,7 @@ static void RenderImGui_DX10(IDXGISwapChain* pSwapChain) {
             ImGui_ImplWin32_NewFrame( );
             ImGui::NewFrame( );
 
-            if (H::bShowDemoWindow) {
-                ImGui::ShowDemoWindow( );
-            }
+            Menu::Render( );
 
             ImGui::Render( );
 
@@ -291,5 +295,5 @@ static void RenderImGui_DX10(IDXGISwapChain* pSwapChain) {
 namespace DX10 {
     void Hook(HWND hwnd) { LOG("[!] DirectX10 backend is not enabled!\n"); }
     void Unhook( ) { }
-}
+} // namespace DX10
 #endif

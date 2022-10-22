@@ -1,10 +1,13 @@
 #pragma once
 
-// Comment BACKEND_ENABLE_DX12 on Windows 7 or any other backend you won't use.
+//
+// Comment whatever backend you don't need.
+//	[!] Don't enable DX12 on Windows 7.
+//
 
-#define BACKEND_ENABLE_DX9
-#define BACKEND_ENABLE_DX10
-#define BACKEND_ENABLE_DX11
-#define BACKEND_ENABLE_DX12
-#define BACKEND_ENABLE_OPENGL
-//#define BACKEND_ENABLE_VULKAN
+#define ENABLE_BACKEND_DX9
+#define ENABLE_BACKEND_DX10
+#define ENABLE_BACKEND_DX11
+#define ENABLE_BACKEND_DX12
+#define ENABLE_BACKEND_OPENGL
+// #define ENABLE_BACKEND_VULKAN

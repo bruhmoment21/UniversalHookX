@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <iostream>
 #include <thread>
 
 #include "console/console.hpp"
@@ -12,47 +13,49 @@ DWORD WINAPI OnProcessAttach(LPVOID lpParam);
 DWORD WINAPI OnProcessDetach(LPVOID lpParam);
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved) {
-	if (fdwReason == DLL_PROCESS_ATTACH) {
-		DisableThreadLibraryCalls(hinstDLL);
+    if (fdwReason == DLL_PROCESS_ATTACH) {
+        DisableThreadLibraryCalls(hinstDLL);
 
-		U::SetRenderingBackend(DIRECTX12);
+        U::SetRenderingBackend(VULKAN);
 
-		HANDLE hHandle = CreateThread(NULL, 0, OnProcessAttach, hinstDLL, 0, NULL);
-		if (hHandle != NULL) CloseHandle(hHandle);
-	} else if (fdwReason == DLL_PROCESS_DETACH) {
-		OnProcessDetach(NULL);
-	}
+        HANDLE hHandle = CreateThread(NULL, 0, OnProcessAttach, hinstDLL, 0, NULL);
+        if (hHandle != NULL) {
+            CloseHandle(hHandle);
+        }
+    } else if (fdwReason == DLL_PROCESS_DETACH) {
+        OnProcessDetach(NULL);
+    }
 
-	return TRUE;
+    return TRUE;
 }
 
 DWORD WINAPI OnProcessAttach(LPVOID lpParam) {
-	MH_Initialize( );
+    MH_Initialize( );
 
-	Console::Alloc( );
-	LOG("[+] Rendering backend: %s\n", U::RenderingBackendToStr( ));
-	if (U::GetRenderingBackend( ) == NONE) {
-		LOG("[!] Will unload in 2 seconds...\nMake sure U::SetRenderingBackground( ) is called.\n");
-		std::this_thread::sleep_for(std::chrono::seconds(2));
-		FreeLibraryAndExitThread(reinterpret_cast<HMODULE>(lpParam), 0);
-		return 0;
-	}
+    Console::Alloc( );
+    LOG("[+] Rendering backend: %s\n", U::RenderingBackendToStr( ));
+    if (U::GetRenderingBackend( ) == NONE) {
+        LOG("[!] Looks like you forgot to set a backend. Will unload after pressing enter...");
+        std::cin.get( );
 
-	H::Init( );
+        FreeLibraryAndExitThread(reinterpret_cast<HMODULE>(lpParam), 0);
+        return 0;
+    }
 
-	return 0;
+    H::Init( );
+
+    return 0;
 }
 
 DWORD WINAPI OnProcessDetach(LPVOID lpParam) {
+    // If the process quits leave memory management to the OS.
+    // H::bShuttingDown == true means we pressed end an must free them by ourself.
+    if (H::bShuttingDown) {
+        H::Free( );
+        MH_Uninitialize( );
+    }
 
-	// If the process quits leave memory management to the OS.
-	// H::bShuttingDown == true means we pressed end an must free them by ourself.
-	if (H::bShuttingDown) {
-		H::Free( );
-		MH_Uninitialize( );
-	}
+    Console::Free( );
 
-	Console::Free( );
-
-	return 0;
+    return 0;
 }

@@ -1,7 +1,7 @@
 #include "../../../backend.hpp"
 #include "../../../console/console.hpp"
 
-#ifdef BACKEND_ENABLE_DX9
+#ifdef ENABLE_BACKEND_DX9
 #include <Windows.h>
 
 #include <d3d9.h>
@@ -17,8 +17,10 @@
 
 #include "../../hooks.hpp"
 
-static LPDIRECT3D9              g_pD3D = NULL;
-static LPDIRECT3DDEVICE9        g_pd3dDevice = NULL;
+#include "../../../menu/menu.hpp"
+
+static LPDIRECT3D9 g_pD3D = NULL;
+static LPDIRECT3DDEVICE9 g_pd3dDevice = NULL;
 
 static void CleanupDeviceD3D9( );
 static void RenderImGui_DX9(IDirect3DDevice9* pDevice);
@@ -30,7 +32,7 @@ static bool CreateDeviceD3D9(HWND hWnd) {
         return false;
     }
 
-    D3DPRESENT_PARAMETERS d3dpp = {};
+    D3DPRESENT_PARAMETERS d3dpp = { };
     d3dpp.Windowed = TRUE;
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
@@ -44,7 +46,7 @@ static bool CreateDeviceD3D9(HWND hWnd) {
 }
 
 static std::add_pointer_t<HRESULT WINAPI(IDirect3DDevice9*, D3DPRESENT_PARAMETERS*)> oReset;
-static HRESULT WINAPI hkReset(IDirect3DDevice9* pDevice, 
+static HRESULT WINAPI hkReset(IDirect3DDevice9* pDevice,
                               D3DPRESENT_PARAMETERS* pPresentationParameters) {
     ImGui_ImplDX9_InvalidateDeviceObjects( );
 
@@ -61,11 +63,11 @@ static HRESULT WINAPI hkResetEx(IDirect3DDevice9* pDevice,
 }
 
 static std::add_pointer_t<HRESULT WINAPI(IDirect3DDevice9*, const RECT*, const RECT*, HWND, const RGNDATA*)> oPresent;
-static HRESULT WINAPI hkPresent(IDirect3DDevice9* pDevice, 
-                                const RECT* pSourceRect, 
-                                const RECT* pDestRect, 
-                                HWND hDestWindowOverride, 
-                                const RGNDATA* pDirtyRegion) {    
+static HRESULT WINAPI hkPresent(IDirect3DDevice9* pDevice,
+                                const RECT* pSourceRect,
+                                const RECT* pDestRect,
+                                HWND hDestWindowOverride,
+                                const RGNDATA* pDirtyRegion) {
     RenderImGui_DX9(pDevice);
 
     return oPresent(pDevice, pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
@@ -94,14 +96,7 @@ namespace DX9 {
         LOG("[+] DirectX9: g_pd3dDevice: 0x%p\n", g_pd3dDevice);
 
         if (g_pd3dDevice) {
-            // Init ImGui
-            ImGui::CreateContext( );
-            ImGui_ImplWin32_Init(hwnd);
-
-            ImGuiIO& io = ImGui::GetIO( );
-
-            io.IniFilename = nullptr;
-            io.LogFilename = nullptr;
+            Menu::InitializeContext(hwnd);
 
             // Hook
             void** pVTable = *reinterpret_cast<void***>(g_pd3dDevice);
@@ -133,15 +128,23 @@ namespace DX9 {
             if (ImGui::GetIO( ).BackendRendererUserData)
                 ImGui_ImplDX9_Shutdown( );
 
-            ImGui_ImplWin32_Shutdown( );
+            if (ImGui::GetIO( ).BackendPlatformUserData)
+                ImGui_ImplWin32_Shutdown( );
+
             ImGui::DestroyContext( );
         }
     }
-}
+} // namespace DX9
 
 static void CleanupDeviceD3D9( ) {
-    if (g_pD3D) { g_pD3D->Release( ); g_pD3D = NULL; }
-    if (g_pd3dDevice) { g_pd3dDevice->Release( ); g_pd3dDevice = NULL; }
+    if (g_pD3D) {
+        g_pD3D->Release( );
+        g_pD3D = NULL;
+    }
+    if (g_pd3dDevice) {
+        g_pd3dDevice->Release( );
+        g_pd3dDevice = NULL;
+    }
 }
 
 static void RenderImGui_DX9(IDirect3DDevice9* pDevice) {
@@ -159,9 +162,7 @@ static void RenderImGui_DX9(IDirect3DDevice9* pDevice) {
         ImGui_ImplWin32_NewFrame( );
         ImGui::NewFrame( );
 
-        if (H::bShowDemoWindow) {
-            ImGui::ShowDemoWindow( );
-        }
+        Menu::Render( );
 
         ImGui::EndFrame( );
         if (pDevice->BeginScene( ) == D3D_OK) {
@@ -178,5 +179,5 @@ static void RenderImGui_DX9(IDirect3DDevice9* pDevice) {
 namespace DX9 {
     void Hook(HWND hwnd) { LOG("[!] DirectX9 backend is not enabled!\n"); }
     void Unhook( ) { }
-}
+} // namespace DX9
 #endif
