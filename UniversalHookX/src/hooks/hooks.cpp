@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <mutex>
 #include <thread>
 
 #include "hooks.hpp"
@@ -18,8 +19,11 @@
 #include "../dependencies/minhook/MinHook.h"
 
 static HWND g_hWindow = NULL;
+static std::mutex g_mReinitHooksGuard;
 
 static DWORD WINAPI ReinitializeGraphicalHooks(LPVOID lpParam) {
+    std::lock_guard<std::mutex> guard{g_mReinitHooksGuard};
+
     LOG("[!] Hooks will reinitialize!\n");
 
     HWND hNewWindow = U::GetProcessWindow( );

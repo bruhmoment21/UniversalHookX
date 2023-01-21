@@ -22,7 +22,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved) {
         if (hHandle != NULL) {
             CloseHandle(hHandle);
         }
-    } else if (fdwReason == DLL_PROCESS_DETACH) {
+    } else if (fdwReason == DLL_PROCESS_DETACH && !lpReserved) {
         OnProcessDetach(NULL);
     }
 
@@ -30,8 +30,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved) {
 }
 
 DWORD WINAPI OnProcessAttach(LPVOID lpParam) {
-    MH_Initialize( );
-
     Console::Alloc( );
     LOG("[+] Rendering backend: %s\n", U::RenderingBackendToStr( ));
     if (U::GetRenderingBackend( ) == NONE) {
@@ -42,18 +40,15 @@ DWORD WINAPI OnProcessAttach(LPVOID lpParam) {
         return 0;
     }
 
+    MH_Initialize( );
     H::Init( );
 
     return 0;
 }
 
 DWORD WINAPI OnProcessDetach(LPVOID lpParam) {
-    // If the process quits leave memory management to the OS.
-    // H::bShuttingDown == true means we pressed end an must free them by ourself.
-    if (H::bShuttingDown) {
-        H::Free( );
-        MH_Uninitialize( );
-    }
+    H::Free( );
+    MH_Uninitialize( );
 
     Console::Free( );
 
