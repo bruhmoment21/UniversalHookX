@@ -22,7 +22,7 @@ We create a 'dummy device' and a 'dummy swapchain' (for DirectX10 and higher) wi
 ## OpenGL
 We hook wglSwapBuffers which is an exported function in opengl32.dll. [See code used in OpenGL backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/opengl/hook_opengl.cpp#L39-L56)
 ## Vulkan
-We create a 'dummy device' to get the required functions addresses. The point is to hook into [vkQueuePresentKHR](https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkQueuePresentKHR.html) where we will submit the queue with our data from our command pool and our command buffer. [See code used in Vulkan backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/vulkan/hook_vulkan.cpp#L286-L317)
+We create a 'dummy device' to get the required functions addresses. The point is to hook into [vkQueuePresentKHR](https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkQueuePresentKHR.html) where we will submit the queue with our data from our command pool and our command buffer. [See code used in Vulkan backend hook.](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/backend/vulkan/hook_vulkan.cpp#L314-L349)
 
 # Media
 ## DirectX9 32bit
@@ -42,13 +42,14 @@ We create a 'dummy device' to get the required functions addresses. The point is
 ![image](https://user-images.githubusercontent.com/53657322/176169557-d278097a-2e1e-40a1-ac07-2d87865ab363.png)
 
 # Other
-Feel free to open an issue if something isn't working. **Resizing** works because [ResizeBuffers](https://docs.microsoft.com/en-us/windows/win32/api/dxgi/nf-dxgi-idxgiswapchain-resizebuffers) is hooked. Input handling is up to you to decide how to make/use it. The WndProc hook is [here](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L42). It should support both 64bit and 32bit architectures.
+Feel free to open an issue if something isn't working. Input handling is left for the user because there is no general solution.
 
 ## Known issues
-Try pressing [HOME](https://github.com/bruhmoment21/UniversalHookX/blob/main/UniversalHookX/src/hooks/hooks.cpp#L46-L49) to rehook and see if things get better.    
-[Minecraft (tested on 1.19) - ui textures glitched sometimes.](https://user-images.githubusercontent.com/53657322/174030423-aa92e780-057e-451d-9d60-ddd20f668d03.png)  
-Does **NOT support every** Vulkan app that uses [Async Compute.](https://stackoverflow.com/questions/65076869/vulkan-queue-families-clarification) (Example: [Doom Eternal](https://github.com/bruhmoment21/UniversalHookX/issues/3#issuecomment-1191235540))  
-Portal 2 will crash if injected while Valve intro is playing.
+Tip: Try pressing the "Home" key, that will rehook graphics, and see if anything changed.
+- **[!] Conflicts with other overlays such as MSI Afterburner and will probably crash.**
+- [Vulkan] Games or apps that present from a queue that doesn't support GRAPHICS_BIT may have issues such as artifacts and menu jittering. (Example: DOOM Eternal)
+- ~~[Vulkan] Portal 2 will crash if injected while Valve intro is playing.~~
+- [OpenGL] [Minecraft (tested on 1.19) - ui textures glitched sometimes.](https://user-images.githubusercontent.com/53657322/174030423-aa92e780-057e-451d-9d60-ddd20f668d03.png)
 
 ## Dependencies
 [MinHook](https://github.com/TsudaKageyu/minhook) - TsudaKageyu - Used for hooking (trampoline method).  
