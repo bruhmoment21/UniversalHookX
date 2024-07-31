@@ -233,6 +233,8 @@ static void CreateRenderTarget(VkDevice device, VkSwapchainKHR swapchain) {
         info.renderPass = g_RenderPass;
         info.attachmentCount = 1;
         info.pAttachments = attachment;
+        info.width = g_ImageExtent.width;
+        info.height = g_ImageExtent.height;
         info.layers = 1;
 
         for (uint32_t i = 0; i < uImageCount; ++i) {
@@ -419,6 +421,15 @@ static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentIn
     if (!g_Device || H::bShuttingDown)
         return;
 
+    if (g_ImageExtent.width == 0 || g_ImageExtent.height == 0) {
+        // We don't know the window size the first time so we just query the window handle.
+        RECT rect{ };
+        GetClientRect(g_Hwnd, &rect);
+
+        g_ImageExtent.width = rect.right - rect.left;
+        g_ImageExtent.height = rect.bottom - rect.top;
+    }
+
     VkQueue graphicQueue = VK_NULL_HANDLE;
     const bool queueSupportsGraphic = DoesQueueSupportGraphic(queue, &graphicQueue);
 
@@ -536,8 +547,8 @@ static void RenderImGui_Vulkan(VkQueue queue, const VkPresentInfoKHR* pPresentIn
             info.waitSemaphoreCount = waitSemaphoresCount;
             info.pWaitSemaphores = pPresentInfo->pWaitSemaphores;
 
-            info.signalSemaphoreCount = 1;
-            info.pSignalSemaphores = &fsd->ImageAcquiredSemaphore;
+            info.signalSemaphoreCount = waitSemaphoresCount;
+            info.pSignalSemaphores = pPresentInfo->pWaitSemaphores;
 
             vkQueueSubmit(graphicQueue, 1, &info, fd->Fence);
         }
